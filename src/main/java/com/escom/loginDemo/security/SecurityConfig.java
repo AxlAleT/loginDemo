@@ -25,7 +25,9 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/user/dashboard")
+                        .successHandler((request, response, authentication) -> {
+                            response.sendRedirect("/dashboard");
+                        })
                         .permitAll()
                 )
                 .logout(logout -> logout

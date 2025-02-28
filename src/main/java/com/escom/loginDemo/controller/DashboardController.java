@@ -16,6 +16,6 @@ public class DashboardController {
         }
 
         // Redirigir a dashboard de usuario normal
-        return "dashboard";
+        return "redirect:/user";
     }
 }

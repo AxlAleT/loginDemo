@@ -17,7 +17,7 @@ public class UserController {
 
     private final UsuarioRepository usuarioRepository;
 
-    @GetMapping("/dashboard")
+    @GetMapping
     public String dashboard() {
         return "user/dashboard";
     }

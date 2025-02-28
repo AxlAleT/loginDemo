@@ -15,8 +15,8 @@ FROM eclipse-temurin:21-jdk AS runtime
 
 WORKDIR /app
 
-# Set default environment variables for PostgreSQL connection
-ENV SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/ingSoftware
+# Environment variables will be overridden by docker-compose
+ENV SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/ingSoftware
 ENV SPRING_DATASOURCE_USERNAME=postgres
 ENV SPRING_DATASOURCE_PASSWORD=asd
 ENV SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect

@@ -11,12 +11,7 @@ public class AdminInitConfig {
     @Bean
     public CommandLineRunner initAdmin(UsuarioService usuarioService) {
         return args -> {
-            // Crea un usuario administrador predeterminado si no existe
-            usuarioService.crearAdministrador(
-                    "admin@example.com",
-                    "admin123",
-                    "Administrador"
-            );
+            usuarioService.crearAdministrador("admin@example.com", "admin123", "Administrador");
         };
     }
 }
