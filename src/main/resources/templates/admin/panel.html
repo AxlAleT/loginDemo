@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col">
+            <h2>Panel de Administración</h2>
+            <p>Bienvenido, <span sec:authentication="name"></span></p>
+        </div>
+        <div class="col-auto">
+            <form id="logout-form" th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="btn btn-outline-danger">Cerrar Sesión</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Gestión de Usuarios</h5>
+                    <p class="card-text">Administre los usuarios del sistema, asigne roles y permisos.</p>
+                    <a href="/admin/usuarios" class="btn btn-primary">Administrar Usuarios</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h3>Resumen de Usuarios</h3>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Total de Usuarios</th>
+                <th>Administradores</th>
+                <th>Usuarios Estándar</th>
+            </tr>
+            </thead>
+            <tbody id="userSummaryTBody">
+            <tr>
+                <td id="totalUsers"></td>
+                <td id="adminUsers"></td>
+                <td id="standardUsers"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="alert alert-danger" id="errorAlert" style="display:none;" role="alert">
+        Error al cargar el resumen de usuarios.
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        loadUserSummary(); // Load user summary data when the page is ready
+    });
+
+    function loadUserSummary() {
+        $.ajax({
+            url: '/api/admin/usuarios', // Same endpoint to get all users
+            type: 'GET',
+            dataType: 'json',
+            success: function(usuarios) {
+                updateUserSummaryTable(usuarios);
+            },
+            error: function() {
+                showAlert('#errorAlert', 'Error al cargar el resumen de usuarios.');
+            }
+        });
+    }
+
+    function updateUserSummaryTable(usuarios) {
+        const totalUsers = usuarios.length;
+        let adminUsersCount = 0;
+        let standardUsersCount = 0;
+
+        $.each(usuarios, function(index, usuario) {
+            if (usuario.rol === 'ROLE_ADMIN') {
+                adminUsersCount++;
+            } else if (usuario.rol === 'ROLE_USER') { // Assuming 'ROLE_USER' is the standard role
+                standardUsersCount++;
+            }
+        });
+
+        $('#totalUsers').text(totalUsers);
+        $('#adminUsers').text(adminUsersCount);
+        $('#standardUsers').text(standardUsersCount);
+    }
+
+    function showAlert(selector, message) {
+        if (message) {
+            $(selector).text(message);
+        }
+        $(selector).fadeIn().delay(3000).fadeOut();
+    }
+</script>
+
+</body>
+</html>
+```

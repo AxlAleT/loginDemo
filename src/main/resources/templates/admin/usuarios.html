@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Gestión de Usuarios</h2>
+        <a href="/admin" class="btn btn-secondary">Volver al Panel</a>
+    </div>
+
+    <div class="mb-3">
+        <button type="button" class="btn btn-primary" onclick="showCreateModal()">Crear Usuario</button>
+    </div>
+
+    <div class="alert alert-success" id="successAlert" style="display:none;" role="alert">
+        Usuario actualizado correctamente.
+    </div>
+    <div class="alert alert-danger" id="errorAlert" style="display:none;" role="alert">
+        Error al realizar la operación.
+    </div>
+
+    <table class="table" id="usuariosTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Crear Usuario</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="userId">
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <input type="password" class="form-control" id="password">
+                        <small id="passwordHelpText" class="form-text text-muted" style="display: none;">Dejar en blanco para no cambiar la contraseña.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="rol">Rol</label>
+                        <select class="form-control" id="rol">
+                            <option value="ROLE_USER">Usuario</option>
+                            <option value="ROLE_ADMIN">Administrador</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveButton">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        loadUsuarios(); // Cargar usuarios al cargar la página
+    });
+
+    function loadUsuarios() {
+        $.ajax({
+            url: '/api/admin/usuarios',
+            type: 'GET',
+            dataType: 'json',
+            success: function(usuarios) {
+                populateUsuariosTable(usuarios);
+            },
+            error: function() {
+                showAlert('#errorAlert', 'Error al cargar usuarios.');
+            }
+        });
+    }
+
+    function populateUsuariosTable(usuarios) {
+        const tbody = $('#usuariosTable tbody');
+        tbody.empty(); // Limpiar la tabla antes de rellenar
+
+        $.each(usuarios, function(index, usuario) {
+            const row = $('<tr>').append(
+                $('<td>').text(usuario.id),
+                $('<td>').text(usuario.nombre),
+                $('<td>').text(usuario.email),
+                $('<td>').text(usuario.rol),
+                $('<td>').append(
+                    $('<button>').addClass('btn btn-sm btn-primary mr-1').text('Editar').on('click', function() {
+                        showEditModal(usuario.id, usuario.nombre, usuario.email, usuario.rol);
+                    }),
+                    $('<button>').addClass('btn btn-sm btn-danger').text('Eliminar').on('click', function() {
+                        deleteUser(usuario.id);
+                    })
+                )
+            );
+            tbody.append(row);
+        });
+    }
+
+    function showCreateModal() {
+        $('#modalTitle').text('Crear Usuario');
+        $('#userId').val('');
+        $('#nombre').val('');
+        $('#email').val('');
+        $('#password').val('');
+        $('#rol').val('ROLE_USER');
+        $('#passwordHelpText').hide();
+        $('#saveButton').off('click').on('click', createUser);
+        $('#userModal').modal('show');
+    }
+
+    function showEditModal(id, nombre, email, rol) {
+        $('#modalTitle').text('Editar Usuario');
+        $('#userId').val(id);
+        $('#nombre').val(nombre);
+        $('#email').val(email);
+        $('#password').val('');
+        $('#rol').val(rol);
+        $('#passwordHelpText').show();
+        $('#saveButton').off('click').on('click', updateUser);
+        $('#userModal').modal('show');
+    }
+
+    function createUser() {
+        const userData = {
+            nombre: $('#nombre').val(),
+            email: $('#email').val(),
+            password: $('#password').val(),
+            rol: $('#rol').val()
+        };
+
+        $.ajax({
+            url: '/api/admin/usuarios',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(userData),
+            success: function() {
+                $('#userModal').modal('hide');
+                showAlert('#successAlert', 'Usuario creado correctamente.');
+                loadUsuarios(); // Recargar la tabla de usuarios
+            },
+            error: function(xhr) {
+                showAlert('#errorAlert', xhr.responseJSON?.message || 'Error al crear usuario');
+            }
+        });
+    }
+
+    function updateUser() {
+        const id = $('#userId').val();
+        const userData = {
+            nombre: $('#nombre').val(),
+            email: $('#email').val(),
+            rol: $('#rol').val()
+        };
+
+        // Solo incluir contraseña si se ha ingresado
+        if ($('#password').val()) {
+            userData.password = $('#password').val();
+        }
+
+        $.ajax({
+            url: '/api/admin/usuarios/' + id,
+            type: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(userData),
+            success: function() {
+                $('#userModal').modal('hide');
+                showAlert('#successAlert', 'Usuario actualizado correctamente.');
+                loadUsuarios(); // Recargar la tabla de usuarios
+            },
+            error: function(xhr) {
+                showAlert('#errorAlert', xhr.responseJSON?.message || 'Error al actualizar usuario');
+            }
+        });
+    }
+
+    function deleteUser(id) {
+        if (confirm('¿Está seguro de que desea eliminar este usuario?')) {
+            $.ajax({
+                url: '/api/admin/usuarios/' + id,
+                type: 'DELETE',
+                success: function() {
+                    showAlert('#successAlert', 'Usuario eliminado correctamente.');
+                    loadUsuarios(); // Recargar la tabla de usuarios
+                },
+                error: function() {
+                    showAlert('#errorAlert', 'Error al eliminar usuario.');
+                }
+            });
+        }
+    }
+
+    function showAlert(selector, message) {
+        if (message) {
+            $(selector).text(message);
+        }
+        $(selector).fadeIn().delay(3000).fadeOut();
+    }
+</script>
+</body>
+</html>
