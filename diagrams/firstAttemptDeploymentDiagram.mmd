@@ -1,0 +1,65 @@
+flowchart LR
+%% Title
+    title[Deployment diagram]
+    title:::hidden
+
+%% Client Browser Section
+    subgraph clientBrowser["Client Browser"]
+        subgraph webInterface["Web Interface"]
+            searchUI["Search UI"]
+            articleViewer["Article Viewer"]
+            recommendations["Recommendations"]
+            pdfViewer["PDF Viewer"]
+        end
+    end
+
+%% Internet Cloud
+    internet["Internet"]
+
+%% Application Server Section
+    subgraph appServer["Application Server"]
+        subgraph springBoot["Spring Boot Application"]
+            subgraph userManagement["User Management"]
+                userAuth["User Auth"]
+                profileService["Profile Service"]
+            end
+
+            subgraph coreFunctionality["Core Functionality"]
+                searchHandler["Search Handler"]
+                articleManager["Article Manager"]
+                recommendationEngine["Recommendation Engine"]
+            end
+        end
+
+        subgraph mainDB["Main Database"]
+            userProfiles["User Profiles"]
+            userHistory["User History"]
+            savedContent["Saved Content"]
+        end
+    end
+
+%% External Services Cloud
+    subgraph externalServices["External Services"]
+        scholar["Semantic Scholar"]
+        crossref["Crossref (Fallback)"]
+    end
+
+%% Connections
+    webInterface --> internet -- "HTTPS" --> springBoot
+    userAuth --> userProfiles -- "Manages" --> null
+    profileService --> savedContent -- "Stores" --> null
+    searchHandler --> userHistory -- "Logs" --> null
+    articleManager --> scholar -- "Metadata" --> null
+    recommendationEngine --> scholar -- "Requests" --> null
+    recommendationEngine --> crossref -- "Fallback" --> null
+
+%% Note
+    note["Core Capabilities:
+- Semantic Scholar integration
+- Search history tracking
+- PDF content display
+- Basic user profiles"]
+appServer --- note
+
+%% Styling
+classDef hidden display:none;
