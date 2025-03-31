@@ -1,0 +1,8 @@
+com/escom/loginDemo/repository/UsuarioRepository.class
+com/escom/loginDemo/security/CustomUserDetailsService.class
+com/escom/loginDemo/LoginDemoApplication.class
+com/escom/loginDemo/security/SecurityConfig.class
+com/escom/loginDemo/dto/RegistroDTO.class
+com/escom/loginDemo/controller/AuthController.class
+com/escom/loginDemo/service/UsuarioService.class
+com/escom/loginDemo/model/Usuario.class
