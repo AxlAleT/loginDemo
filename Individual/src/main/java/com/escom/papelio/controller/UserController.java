@@ -31,4 +31,10 @@ public class UserController {
         model.addAttribute("usuario", usuario);
         return "user/profile";
     }
+
+    @GetMapping("/search")
+    public String showSearchPage() {
+        return "user/search";
+    }
+
 }
