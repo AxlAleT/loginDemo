@@ -2,7 +2,7 @@ const csrfToken = $("meta[name='_csrf']").attr("content");
 const csrfHeader = $("meta[name='_csrf_header']").attr("content");
 
 $(document).ready(function () {
-    // Configurar el encabezado CSRF para todas las solicitudes AJAX
+    // Configure CSRF header for all AJAX requests
     $.ajaxSetup({
         beforeSend: function (xhr) {
             if (csrfHeader && csrfToken) {
@@ -11,7 +11,7 @@ $(document).ready(function () {
         }
     });
 
-    // Eventos de búsqueda
+    // Search events
     $('#basicSearchBtn').click(function () {
         const query = $('#basicQuery').val().trim();
         if (query) {
@@ -23,28 +23,28 @@ $(document).ready(function () {
         performAdvancedSearch();
     });
 
-    // También buscar al presionar Enter en los campos de búsqueda
+    // Also search when pressing Enter in search fields
     $('#basicQuery').keypress(function (e) {
         if (e.which === 13) {
             $('#basicSearchBtn').click();
         }
     });
 
-    // Cargar historial cuando se cambia a la pestaña
+    // Load history when switching to the tab
     $('#history-tab').on('shown.bs.tab', function () {
         loadSearchHistory();
     });
 
-    // Función para realizar búsqueda básica
+    // Function to perform basic search
     function performSearch(query, isAdvanced = false) {
-        // Mostrar indicador de carga
+        // Show loading indicator
         $('#loader').show();
         $('#searchResults').empty();
 
         const endpoint = isAdvanced ? '/api/search/advanced' : '/api/search';
         const payload = {query: query};
 
-        // Para búsquedas avanzadas, añadir filtros adicionales
+        // For advanced searches, add additional filters
         if (isAdvanced) {
             const authors = $('#authors').val();
             const yearFrom = $('#yearFrom').val();
@@ -68,10 +68,10 @@ $(document).ready(function () {
             error: function (error) {
                 $('#searchResults').html(`
                         <div class="alert panel-alert-danger">
-                            Ha ocurrido un error al realizar la búsqueda. Por favor, intenta de nuevo.
+                            An error occurred while performing the search. Please try again.
                         </div>
                     `);
-                console.error('Error en la búsqueda:', error);
+                console.error('Search error:', error);
             },
             complete: function () {
                 $('#loader').hide();
@@ -79,7 +79,7 @@ $(document).ready(function () {
         });
     }
 
-    // Función para realizar búsqueda avanzada
+    // Function to perform advanced search
     function performAdvancedSearch() {
         const query = $('#advancedQuery').val().trim();
         if (query) {
@@ -87,24 +87,24 @@ $(document).ready(function () {
         }
     }
 
-    // Función para mostrar resultados
+    // Function to display results
     function displayResults(response) {
         if (!response || !response.articles || response.articles.length === 0) {
             $('#searchResults').html(`
                     <div class="alert panel-alert-danger">
-                        No se encontraron resultados para tu búsqueda.
+                        No results found for your search.
                     </div>
                 `);
             return;
         }
 
         let resultsHtml = `
-                <h4 class="mb-3">Se encontraron ${response.total} resultados</h4>
+                <h4 class="mb-3">${response.articles.length} results found</h4>
                 <div class="row">
             `;
 
         response.articles.forEach(article => {
-            // Preparar lista de autores para mostrar
+            // Prepare author list for display
             let authorsHtml = '';
             if (article.authors && article.authors.length > 0) {
                 article.authors.slice(0, 3).forEach(author => {
@@ -112,11 +112,11 @@ $(document).ready(function () {
                 });
 
                 if (article.authors.length > 3) {
-                    authorsHtml += `<span class="author-chip">+${article.authors.length - 3} más</span>`;
+                    authorsHtml += `<span class="author-chip">+${article.authors.length - 3} more</span>`;
                 }
             }
 
-            // Construir tarjeta de artículo
+            // Build article card
             resultsHtml += `
                     <div class="col-md-6 mb-4">
                         <div class="panel-card article-card" data-id="${article.id}">
@@ -127,10 +127,10 @@ $(document).ready(function () {
                                 </div>
                                 <div class="mb-2">
                                     <span class="badge badge-year">${article.year || 'N/A'}</span>
-                                    <span class="badge badge-citations">${article.citationCount || 0} citaciones</span>
+                                    <span class="badge badge-citations">${article.citationCount || 0} citations</span>
                                 </div>
-                                <p class="article-abstract">${article.abstract || 'No hay resumen disponible para este artículo.'}</p>
-                                <button class="btn panel-btn btn-sm view-details" data-id="${article.id}">Ver Detalles</button>
+                                <p class="article-abstract">${article.abstract || 'No abstract available for this article.'}</p>
+                                <button class="btn panel-btn btn-sm view-details" data-id="${article.id}">View Details</button>
                             </div>
                         </div>
                     </div>
@@ -140,14 +140,14 @@ $(document).ready(function () {
         resultsHtml += '</div>';
         $('#searchResults').html(resultsHtml);
 
-        // Añadir evento para ver detalles
+        // Add event to view details
         $('.view-details').click(function () {
             const articleId = $(this).data('id');
             loadArticleDetails(articleId);
         });
     }
 
-    // Función para cargar detalles de un artículo
+    // Function to load article details
     function loadArticleDetails(articleId) {
         $('#loader').show();
 
@@ -155,11 +155,11 @@ $(document).ready(function () {
             url: `/api/search/article/${articleId}`,
             method: 'GET',
             success: function (article) {
-                // Construir HTML para detalles del artículo
+                // Build HTML for article details
                 let detailsHtml = `
                         <h4>${article.title}</h4>
                         <div class="my-3">
-                            <strong>Autores:</strong><br>
+                            <strong>Authors:</strong><br>
                     `;
 
                 if (article.authors && article.authors.length > 0) {
@@ -167,27 +167,27 @@ $(document).ready(function () {
                         detailsHtml += `<span class="author-chip">${author}</span>`;
                     });
                 } else {
-                    detailsHtml += '<span>No disponible</span>';
+                    detailsHtml += '<span>Not available</span>';
                 }
 
                 detailsHtml += `
                         </div>
                         <div class="my-3">
-                            <strong>Año:</strong> ${article.year || 'No disponible'}<br>
-                            <strong>Citaciones:</strong> ${article.citationCount || 0}<br>
-                            <strong>DOI:</strong> ${article.doi || 'No disponible'}<br>
-                            <strong>Revista:</strong> ${article.venue || 'No disponible'}
+                            <strong>Year:</strong> ${article.year || 'Not available'}<br>
+                            <strong>Citations:</strong> ${article.citationCount || 0}<br>
+                            <strong>DOI:</strong> ${article.doi || 'Not available'}<br>
+                            <strong>Journal:</strong> ${article.venue || 'Not available'}
                         </div>
                         <div class="my-3">
-                            <strong>Resumen:</strong>
-                            <p>${article.abstract || 'No hay resumen disponible para este artículo.'}</p>
+                            <strong>Abstract:</strong>
+                            <p>${article.abstract || 'No abstract available for this article.'}</p>
                         </div>
                     `;
 
                 if (article.keywords && article.keywords.length > 0) {
                     detailsHtml += `
                             <div class="my-3">
-                                <strong>Palabras clave:</strong><br>
+                                <strong>Keywords:</strong><br>
                         `;
 
                     article.keywords.forEach(keyword => {
@@ -197,22 +197,22 @@ $(document).ready(function () {
                     detailsHtml += '</div>';
                 }
 
-                // Mostrar detalles en el modal
+                // Display details in the modal
                 $('#articleDetails').html(detailsHtml);
 
-                // Configurar enlace para ver artículo completo
+                // Set link to view full article
                 if (article.url) {
                     $('#viewFullArticle').attr('href', article.url).show();
                 } else {
                     $('#viewFullArticle').hide();
                 }
 
-                // Mostrar modal
+                // Show modal
                 $('#articleModal').modal('show');
             },
             error: function (error) {
-                console.error('Error al cargar detalles del artículo:', error);
-                alert('No se pudieron cargar los detalles del artículo.');
+                console.error('Error loading article details:', error);
+                alert('Could not load article details.');
             },
             complete: function () {
                 $('#loader').hide();
@@ -220,7 +220,7 @@ $(document).ready(function () {
         });
     }
 
-    // Función para cargar historial de búsqueda
+    // Function to load search history
     function loadSearchHistory() {
         $.ajax({
             url: '/api/search/history',
@@ -229,7 +229,7 @@ $(document).ready(function () {
                 if (!history || history.length === 0) {
                     $('#searchHistoryContent').html(`
                             <div class="alert panel-alert-secondary">
-                                No hay búsquedas recientes en tu historial.
+                                No recent searches in your history.
                             </div>
                         `);
                     return;
@@ -239,9 +239,9 @@ $(document).ready(function () {
                         <table class="panel-table">
                             <thead>
                                 <tr>
-                                    <th>Consulta</th>
-                                    <th>Fecha</th>
-                                    <th>Acciones</th>
+                                    <th>Query</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -260,7 +260,7 @@ $(document).ready(function () {
                                     <button class="btn panel-action-btn panel-action-primary repeat-search"
                                             data-query="${query}"
                                             data-advanced="${isAdvanced}">
-                                        Repetir
+                                        Repeat
                                     </button>
                                 </td>
                             </tr>
@@ -274,12 +274,12 @@ $(document).ready(function () {
 
                 $('#searchHistoryContent').html(historyHtml);
 
-                // Añadir evento para repetir búsqueda
+                // Add event to repeat search
                 $('.repeat-search').click(function () {
                     const query = $(this).data('query');
                     const isAdvanced = $(this).data('advanced') === true;
 
-                    // Limpiar el prefijo "Advanced:" si existe
+                    // Clean the "Advanced:" prefix if it exists
                     const cleanQuery = isAdvanced && query.startsWith('Advanced:')
                         ? query.substring(9).trim()
                         : query;
@@ -302,10 +302,10 @@ $(document).ready(function () {
             error: function (error) {
                 $('#searchHistoryContent').html(`
                         <div class="alert panel-alert-danger">
-                            Error al cargar el historial de búsqueda.
+                            Error loading search history.
                         </div>
                     `);
-                console.error('Error al cargar historial:', error);
+                console.error('Error loading history:', error);
             }
         });
     }

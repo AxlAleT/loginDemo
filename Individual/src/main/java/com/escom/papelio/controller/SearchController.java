@@ -15,7 +15,7 @@ import java.security.Principal;
 @Controller
 @RequestMapping("/search")
 @RequiredArgsConstructor
-public class ArticleController {
+public class SearchController {
 
     private final ArticleService articleService;
     private final SearchHistoryService searchHistoryService;
@@ -23,7 +23,7 @@ public class ArticleController {
     @GetMapping
     public String showSearchPage(Model model) {
         model.addAttribute("searchRequest", new SearchRequestDTO());
-        return "search/index";
+        return "user/search";
     }
 
     @GetMapping("/advanced")

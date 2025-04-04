@@ -43,13 +43,15 @@ public class SemanticScholarService implements ArticleService {
     public SearchResponseDTO searchArticles(SearchRequestDTO searchRequest) {
         log.info("Performing basic search with query: {}", searchRequest.getQuery());
 
-        String uri = UriComponentsBuilder.fromHttpUrl(apiBaseUrl + "/paper/search")
+        String uri = UriComponentsBuilder.fromHttpUrl(apiBaseUrl + "/paper/search/bulk")
                 .queryParam("query", searchRequest.getQuery())
                 .queryParam("offset", searchRequest.getPage() * searchRequest.getSize())
                 .queryParam("limit", searchRequest.getSize())
                 .queryParam("fields", "title,abstract,authors,venue,year,citationCount,url,externalIds")
                 .build()
                 .toUriString();
+
+        log.debug("Calling Semantic Scholar API with URL: {}", uri);
 
         try {
             var response = executeWithRetry(() -> webClient.get()
@@ -60,8 +62,14 @@ public class SemanticScholarService implements ArticleService {
                     .block());
 
             if (response == null) {
+                log.warn("Received null response from Semantic Scholar API");
                 return createEmptyResponse(searchRequest);
             }
+
+            log.debug("API Response: {}", response);
+            log.info("Received {} results out of total {}", 
+                response.getData() != null ? response.getData().size() : 0, 
+                response.getTotal());
 
             List<ArticleDTO> articles = new ArrayList<>();
             if (response.getData() != null) {
@@ -109,6 +117,7 @@ public class SemanticScholarService implements ArticleService {
         }
 
         String uri = uriBuilder.build().toUriString();
+        log.debug("Calling Semantic Scholar API with URL: {}", uri);
 
         try {
             var response = executeWithRetry(() -> webClient.get()
@@ -119,8 +128,14 @@ public class SemanticScholarService implements ArticleService {
                     .block());
 
             if (response == null) {
+                log.warn("Received null response from Semantic Scholar API");
                 return createEmptyResponse(searchRequest);
             }
+
+            log.debug("API Response: {}", response);
+            log.info("Received {} results out of total {}", 
+                response.getData() != null ? response.getData().size() : 0, 
+                response.getTotal());
 
             List<ArticleDTO> articles = new ArrayList<>();
             if (response.getData() != null) {
@@ -155,6 +170,8 @@ public class SemanticScholarService implements ArticleService {
                 .build()
                 .toUriString();
 
+        log.debug("Calling Semantic Scholar API with URL: {}", uri);
+
         try {
             var response = executeWithRetry(() -> webClient.get()
                     .uri(uri)
@@ -164,9 +181,11 @@ public class SemanticScholarService implements ArticleService {
                     .block());
 
             if (response == null) {
+                log.warn("Received null response from Semantic Scholar API for ID: {}", id);
                 return Optional.empty();
             }
 
+            log.debug("API Response for article {}: {}", id, response);
             return Optional.of(mapToArticleDTO(response));
         } catch (Exception e) {
             log.error("Error fetching article details after retries: {}", e.getMessage(), e);
@@ -227,6 +246,8 @@ public class SemanticScholarService implements ArticleService {
     }
 
     private ArticleDTO mapToArticleDTO(SemanticScholarPaper paper) {
+        log.debug("Mapping paper to ArticleDTO: {}", paper.getPaperId());
+        
         ArticleDTO dto = new ArticleDTO();
         dto.setId(paper.getPaperId());
         dto.setTitle(paper.getTitle());
