@@ -1,7 +1,7 @@
 package com.escom.papelio.controller;
 
-import com.escom.papelio.model.Usuario;
-import com.escom.papelio.repository.UsuarioRepository;
+import com.escom.papelio.model.User;
+import com.escom.papelio.repository.UserRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,20 +15,20 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UsuarioRepository usuarioRepository;
+    private final UserRepository userRepository;
 
     @GetMapping
     public String dashboard() {
         return "user/dashboard";
     }
 
-    @GetMapping("/perfil")
-    public String mostrarPerfil(Model model, Principal principal) {
+    @GetMapping("/profile")
+    public String showProfile(Model model, Principal principal) {
         String email = principal.getName();
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        model.addAttribute("usuario", usuario);
+        model.addAttribute("user", user);
         return "user/profile";
     }
 

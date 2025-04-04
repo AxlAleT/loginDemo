@@ -1,8 +1,8 @@
 package com.escom.papelio.service;
 
-import com.escom.papelio.dto.UsuarioDTO;
-import com.escom.papelio.model.Usuario;
-import com.escom.papelio.repository.UsuarioRepository;
+import com.escom.papelio.dto.UserDTO;
+import com.escom.papelio.model.User;
+import com.escom.papelio.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,87 +14,87 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminService {
 
-    private final UsuarioRepository usuarioRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<UsuarioDTO> listarUsuarios() {
-        return usuarioRepository.findAll().stream()
+    public List<UserDTO> listarUsuarios() {
+        return userRepository.findAll().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
-    public UsuarioDTO obtenerUsuarioPorId(Long id) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        return mapToDTO(usuario);
+    public UserDTO obtenerUsuarioPorId(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User no encontrado"));
+        return mapToDTO(user);
     }
 
-    public UsuarioDTO crearUsuario(UsuarioDTO usuarioDTO) {
-        if (usuarioRepository.existsByEmail(usuarioDTO.getEmail())) {
+    public UserDTO crearUsuario(UserDTO userDTO) {
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new RuntimeException("El email ya está registrado");
         }
 
-        Usuario usuario = new Usuario();
-        usuario.setEmail(usuarioDTO.getEmail());
-        usuario.setNombre(usuarioDTO.getNombre());
+        User user = new User();
+        user.setEmail(userDTO.getEmail());
+        user.setNombre(userDTO.getNombre());
 
         // Codificar contraseña solo si se proporciona
-        if (usuarioDTO.getPassword() != null && !usuarioDTO.getPassword().isEmpty()) {
-            usuario.setPassword(passwordEncoder.encode(usuarioDTO.getPassword()));
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         } else {
             throw new RuntimeException("La contraseña es obligatoria");
         }
 
         // Validar rol
-        if (usuarioDTO.getRol() != null && (usuarioDTO.getRol().equals("ROLE_ADMIN") || usuarioDTO.getRol().equals("ROLE_USER"))) {
-            usuario.setRol(usuarioDTO.getRol());
+        if (userDTO.getRol() != null && (userDTO.getRol().equals("ROLE_ADMIN") || userDTO.getRol().equals("ROLE_USER"))) {
+            user.setRol(userDTO.getRol());
         } else {
-            usuario.setRol("ROLE_USER"); // Rol predeterminado
+            user.setRol("ROLE_USER"); // Rol predeterminado
         }
 
-        Usuario saved = usuarioRepository.save(usuario);
+        User saved = userRepository.save(user);
         return mapToDTO(saved);
     }
 
-    public UsuarioDTO actualizarUsuario(Long id, UsuarioDTO usuarioDTO) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    public UserDTO actualizarUsuario(Long id, UserDTO userDTO) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User no encontrado"));
 
-        // Verificar si el email ya existe y no es del mismo usuario
-        if (!usuario.getEmail().equals(usuarioDTO.getEmail()) && usuarioRepository.existsByEmail(usuarioDTO.getEmail())) {
+        // Verificar si el email ya existe y no es del mismo user
+        if (!user.getEmail().equals(userDTO.getEmail()) && userRepository.existsByEmail(userDTO.getEmail())) {
             throw new RuntimeException("El email ya está registrado");
         }
 
-        usuario.setEmail(usuarioDTO.getEmail());
-        usuario.setNombre(usuarioDTO.getNombre());
+        user.setEmail(userDTO.getEmail());
+        user.setNombre(userDTO.getNombre());
 
         // Actualizar contraseña solo si se proporciona
-        if (usuarioDTO.getPassword() != null && !usuarioDTO.getPassword().isEmpty()) {
-            usuario.setPassword(passwordEncoder.encode(usuarioDTO.getPassword()));
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         }
 
         // Validar rol
-        if (usuarioDTO.getRol() != null && (usuarioDTO.getRol().equals("ROLE_ADMIN") || usuarioDTO.getRol().equals("ROLE_USER"))) {
-            usuario.setRol(usuarioDTO.getRol());
+        if (userDTO.getRol() != null && (userDTO.getRol().equals("ROLE_ADMIN") || userDTO.getRol().equals("ROLE_USER"))) {
+            user.setRol(userDTO.getRol());
         }
 
-        Usuario saved = usuarioRepository.save(usuario);
+        User saved = userRepository.save(user);
         return mapToDTO(saved);
     }
 
     public void eliminarUsuario(Long id) {
-        if (!usuarioRepository.existsById(id)) {
-            throw new RuntimeException("Usuario no encontrado");
+        if (!userRepository.existsById(id)) {
+            throw new RuntimeException("User no encontrado");
         }
-        usuarioRepository.deleteById(id);
+        userRepository.deleteById(id);
     }
 
-    private UsuarioDTO mapToDTO(Usuario usuario) {
-        UsuarioDTO dto = new UsuarioDTO();
-        dto.setId(usuario.getId());
-        dto.setEmail(usuario.getEmail());
-        dto.setNombre(usuario.getNombre());
-        dto.setRol(usuario.getRol());
+    private UserDTO mapToDTO(User user) {
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setEmail(user.getEmail());
+        dto.setNombre(user.getNombre());
+        dto.setRol(user.getRol());
         // No incluir contraseña en la respuesta
         return dto;
     }

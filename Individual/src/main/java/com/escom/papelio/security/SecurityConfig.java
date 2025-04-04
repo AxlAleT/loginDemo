@@ -18,8 +18,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/registro", "/login", "/css/**", "/images/**").permitAll()
+                        .requestMatchers("/registro", "/login", "/css/**", "/images/**", "/js/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/user/**").authenticated()
                         .requestMatchers("/user/**").authenticated()
                         .anyRequest().authenticated()
                 )
@@ -37,7 +38,9 @@ public class SecurityConfig {
                 )
                 .rememberMe(remember -> remember
                         .key("uniqueAndSecret")
-                );
+                )
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/**")); // Disable CSRF for API endpoints
 
         return http.build();
     }

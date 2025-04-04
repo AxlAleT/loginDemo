@@ -33,7 +33,7 @@ flowchart TB
 
     subgraph "External Services"
         scholar["Semantic Scholar API"]
-        crossref["Crossref API (Fallback)"]
+        crossref["Crossref API"]
     end
     
     %% Connections
@@ -43,7 +43,7 @@ flowchart TB
     
     jdk -->|"Execution Environment"|springapp
     
-    springapp -->|"JPA / Hibernate"|postgres
+    springapp -->|"JPA"|postgres
     postgres -->|"Storage"|pgdata
     
     artifacts -->|"Built From"|pom

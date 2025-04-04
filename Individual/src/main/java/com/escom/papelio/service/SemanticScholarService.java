@@ -12,12 +12,16 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +29,8 @@ import java.util.Optional;
 public class SemanticScholarService implements ArticleService {
 
     private final WebClient webClient;
+    private final Random random = new Random();
+    private static final int MAX_RETRIES = 10;
 
     @Value("${api.semantic-scholar.base-url:https://api.semanticscholar.org/graph/v1}")
     private String apiBaseUrl;
@@ -46,12 +52,12 @@ public class SemanticScholarService implements ArticleService {
                 .toUriString();
 
         try {
-            var response = webClient.get()
+            var response = executeWithRetry(() -> webClient.get()
                     .uri(uri)
                     .headers(this::setHeaders)
                     .retrieve()
                     .bodyToMono(SemanticScholarResponse.class)
-                    .block();
+                    .block());
 
             if (response == null) {
                 return createEmptyResponse(searchRequest);
@@ -72,7 +78,7 @@ public class SemanticScholarService implements ArticleService {
                     searchRequest.getQuery()
             );
         } catch (Exception e) {
-            log.error("Error searching articles: {}", e.getMessage(), e);
+            log.error("Error searching articles after retries: {}", e.getMessage(), e);
             return createEmptyResponse(searchRequest);
         }
     }
@@ -105,12 +111,12 @@ public class SemanticScholarService implements ArticleService {
         String uri = uriBuilder.build().toUriString();
 
         try {
-            var response = webClient.get()
+            var response = executeWithRetry(() -> webClient.get()
                     .uri(uri)
                     .headers(this::setHeaders)
                     .retrieve()
                     .bodyToMono(SemanticScholarResponse.class)
-                    .block();
+                    .block());
 
             if (response == null) {
                 return createEmptyResponse(searchRequest);
@@ -134,7 +140,7 @@ public class SemanticScholarService implements ArticleService {
                     searchRequest.getQuery()
             );
         } catch (Exception e) {
-            log.error("Error performing advanced search: {}", e.getMessage(), e);
+            log.error("Error performing advanced search after retries: {}", e.getMessage(), e);
             return createEmptyResponse(searchRequest);
         }
     }
@@ -150,12 +156,12 @@ public class SemanticScholarService implements ArticleService {
                 .toUriString();
 
         try {
-            var response = webClient.get()
+            var response = executeWithRetry(() -> webClient.get()
                     .uri(uri)
                     .headers(this::setHeaders)
                     .retrieve()
                     .bodyToMono(SemanticScholarPaper.class)
-                    .block();
+                    .block());
 
             if (response == null) {
                 return Optional.empty();
@@ -163,9 +169,55 @@ public class SemanticScholarService implements ArticleService {
 
             return Optional.of(mapToArticleDTO(response));
         } catch (Exception e) {
-            log.error("Error fetching article details: {}", e.getMessage(), e);
+            log.error("Error fetching article details after retries: {}", e.getMessage(), e);
             return Optional.empty();
         }
+    }
+    
+    /**
+     * Executes a function with retry logic for handling 429 Too Many Requests errors
+     * Will retry up to MAX_RETRIES times with a random delay between 0-1 second
+     * @param supplier The function to execute that might throw a 429 exception
+     * @return The result of the function execution
+     * @param <T> The return type of the function
+     * @throws Exception If the function still fails after all retries
+     */
+    private <T> T executeWithRetry(Supplier<T> supplier) throws Exception {
+        int attempts = 0;
+        Exception lastException = null;
+        
+        while (attempts < MAX_RETRIES) {
+            try {
+                return supplier.get();
+            } catch (WebClientResponseException e) {
+                if (e.getStatusCode().value() == 429) {
+                    attempts++;
+                    lastException = e;
+                    
+                    // Calculate random delay between 0-1000ms
+                    long delayMillis = random.nextInt(1000);
+                    log.warn("Received 429 Too Many Requests, retry attempt {}/{} after {}ms delay", 
+                            attempts, MAX_RETRIES, delayMillis);
+                    
+                    try {
+                        Thread.sleep(delayMillis);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("Interrupted during retry delay", ie);
+                    }
+                } else {
+                    throw e;
+                }
+            } catch (Exception e) {
+                throw e;
+            }
+        }
+        
+        log.error("Failed after {} retry attempts", MAX_RETRIES);
+        if (lastException != null) {
+            throw lastException;
+        }
+        throw new RuntimeException("Failed after maximum retries");
     }
 
     private void setHeaders(HttpHeaders headers) {

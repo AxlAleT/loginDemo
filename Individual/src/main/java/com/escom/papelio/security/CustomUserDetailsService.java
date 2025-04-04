@@ -1,9 +1,8 @@
 package com.escom.papelio.security;
 
-import com.escom.papelio.model.Usuario;
-import com.escom.papelio.repository.UsuarioRepository;
+import com.escom.papelio.model.User;
+import com.escom.papelio.repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,17 +15,17 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UsuarioRepository usuarioRepository;
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User no encontrado: " + email));
 
-        return new User(
-                usuario.getEmail(),
-                usuario.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority(usuario.getRol()))
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                Collections.singletonList(new SimpleGrantedAuthority(user.getRol()))
         );
     }
 }

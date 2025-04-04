@@ -1,8 +1,0 @@
-/home/axltorres/Repo/loginDemo/src/main/java/com/escom/loginDemo/LoginDemoApplication.java
-/home/axltorres/Repo/loginDemo/src/main/java/com/escom/loginDemo/controller/AuthController.java
-/home/axltorres/Repo/loginDemo/src/main/java/com/escom/loginDemo/dto/RegistroDTO.java
-/home/axltorres/Repo/loginDemo/src/main/java/com/escom/loginDemo/model/Usuario.java
-/home/axltorres/Repo/loginDemo/src/main/java/com/escom/loginDemo/repository/UsuarioRepository.java
-/home/axltorres/Repo/loginDemo/src/main/java/com/escom/loginDemo/security/CustomUserDetailsService.java
-/home/axltorres/Repo/loginDemo/src/main/java/com/escom/loginDemo/security/SecurityConfig.java
-/home/axltorres/Repo/loginDemo/src/main/java/com/escom/loginDemo/service/UsuarioService.java

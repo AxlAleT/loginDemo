@@ -21,7 +21,6 @@
 | **Search History Tracking** | Log user search queries with timestamps | Use `SecurityContextHolder` to inject user context into Spring Data JPA repositories |
 | **Favorites Management** | Save/remove articles to a personal list | Many-to-many relationships in JPA, audit fields (`@CreatedDate`) |
 | **Personalized Search Suggestions** | Suggest keywords based on user history | Store aggregated history data, use Spring `@Scheduled` for periodic analysis |
-| **Export Saved Articles** | Export favorites/history as CSV/JSON | Secure file generation with role checks (`@Secured`) |
 
 ---
 
@@ -44,8 +43,6 @@
 |----------|------|--------------|
 | **Semantic Scholar-Based Recommendations** | Fetch related articles via recommendation API | Circuit breakers (Resilience4j) for fault tolerance |
 | **Trending Research Alerts** | Highlight popular articles in a field | Scheduled API polling with `@Scheduled`, cache results in Redis |
-| **Collaborative Filtering** | Suggest articles based on similar users’ activity | Integrate lightweight ML libraries (e.g., Apache Mahout) with Spring Batch |
-| **Citation Network Visualization** | Show citation relationships between papers | Role-based access (`@PostAuthorize`) for premium users |
 
 ---
 
@@ -67,7 +64,6 @@
 | Use Case | Goal | Design Focus |
 |----------|------|--------------|
 | **Responsive UI Rendering** | Adapt UI to mobile/desktop | Serve Thymeleaf templates or integrate with a frontend framework |
-| **Third-Party API Integration** | Allow developers to query articles via REST | Secure endpoints with API keys using Spring Security’s `RequestMatcher` |
 | **Metadata Normalization** | Standardize data from CrossRef/Semantic Scholar | Custom Spring `Converter` implementations for DTO mapping |
 | **Error Handling** | Return user-friendly API/client errors | Global exception handling with `@ControllerAdvice`, custom HTTP codes |
 
@@ -81,6 +77,6 @@
 | **Brute-Force Login Prevention** | Block repeated failed login attempts | Implement `AuthenticationFailureHandler` with lockout counters |
 | **Session Timeout Management** | Automatically log out inactive users | Configure `HttpSession` timeout in `application.yml` |
 | **Password Policy Enforcement** | Require strong passwords | Custom `PasswordEncoder` with regex validation |
-| **Role Hierarchies** | Define admin/moderator/user permissions | Configure `RoleHierarchy` in Spring Security |
+| **Role Hierarchies** | Define admin/user permissions | Configure `RoleHierarchy` in Spring Security |
 
 ---

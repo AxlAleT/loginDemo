@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración</title>
+    <title>Admin Panel</title>
     <link href="https://fonts.googleapis.com/css?family=Karla:400,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
@@ -21,13 +21,13 @@
                     <div class="panel-wrapper">
                         <img th:src="@{/images/logo.png}" alt="logo" class="logo">
                     </div>
-                    <h2 class="panel-card-title">Panel de Administración</h2>
-                    <p class="user-welcome">Bienvenido, <span sec:authentication="name"></span></p>
+                    <h2 class="panel-card-title">Admin Panel</h2>
+                    <p class="user-welcome">Welcome, <span sec:authentication="name"></span></p>
                 </div>
                 <div>
                     <form id="logout-form" th:action="@{/logout}" method="post">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                        <button type="submit" class="btn panel-action-danger">Cerrar Sesión</button>
+                        <button type="submit" class="btn panel-action-danger">Log Out</button>
                     </form>
                 </div>
             </div>
@@ -35,23 +35,23 @@
             <div class="row">
                 <div class="col-md-4 mb-4">
                     <div class="summary-card">
-                        <h4>Total de Usuarios</h4>
+                        <h4>Total Users</h4>
                         <div class="number" id="totalUsers">0</div>
-                        <p>Usuarios registrados en el sistema</p>
+                        <p>Users registered in the system</p>
                     </div>
                 </div>
                 <div class="col-md-4 mb-4">
                     <div class="summary-card">
-                        <h4>Administradores</h4>
+                        <h4>Administrators</h4>
                         <div class="number" id="adminUsers">0</div>
-                        <p>Usuarios con rol de administrador</p>
+                        <p>Users with admin role</p>
                     </div>
                 </div>
                 <div class="col-md-4 mb-4">
                     <div class="summary-card">
-                        <h4>Usuarios Estándar</h4>
+                        <h4>Standard Users</h4>
                         <div class="number" id="standardUsers">0</div>
-                        <p>Usuarios con rol estándar</p>
+                        <p>Users with standard role</p>
                     </div>
                 </div>
             </div>
@@ -60,16 +60,16 @@
                 <div class="col-md-6">
                     <div class="panel-card">
                         <div class="card-body">
-                            <h5 class="panel-card-title">Gestión de Usuarios</h5>
-                            <p>Administre los usuarios del sistema, asigne roles y permisos.</p>
-                            <a th:href="@{/admin/usuarios}" class="btn panel-btn">Administrar Usuarios</a>
+                            <h5 class="panel-card-title">User Management</h5>
+                            <p>Manage system users, assign roles and permissions.</p>
+                            <a th:href="@{/admin/users}" class="btn panel-btn">Manage Users</a>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="panel-alert panel-alert-danger" id="errorAlert" style="display:none;" role="alert">
-                Error al cargar el resumen de usuarios.
+                Error loading user summary.
             </div>
 
             <div class="panel-card-footer-nav">

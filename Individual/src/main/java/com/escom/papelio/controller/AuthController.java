@@ -1,7 +1,7 @@
 package com.escom.papelio.controller;
 
-import com.escom.papelio.dto.RegistroDTO;
-import com.escom.papelio.service.UsuarioService;
+import com.escom.papelio.dto.RegisterDTO;
+import com.escom.papelio.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,24 +17,24 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final UsuarioService usuarioService;
+    private final UserService userService;
 
     @GetMapping("/registro")
     public String mostrarFormularioRegistro(Model model) {
-        model.addAttribute("usuario", new RegistroDTO());
-        return "registro";
+        model.addAttribute("usuario", new RegisterDTO());
+        return "register";
     }
 
     @PostMapping("/registro")
-    public String registrarUsuario(@Valid @ModelAttribute("usuario") RegistroDTO registroDTO,
+    public String registrarUsuario(@Valid @ModelAttribute("usuario") RegisterDTO registerDTO,
                                    BindingResult result,
                                    RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            return "registro";
+            return "register";
         }
 
         try {
-            usuarioService.registrarUsuario(registroDTO);
+            userService.registrarUsuario(registerDTO);
             redirectAttributes.addFlashAttribute("exito", "Registro exitoso! Por favor inicia sesión");
             return "redirect:/login";
         } catch (RuntimeException e) {
