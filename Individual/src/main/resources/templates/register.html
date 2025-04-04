@@ -28,14 +28,14 @@
 
                         <!-- Mensajes de error o éxito -->
                         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-                        <div th:if="${exito}" class="alert alert-success" th:text="${exito}"></div>
+                        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
                         <!-- Formulario de registro -->
-                        <form th:action="@{/registro}" th:object="${user}" method="post">
+                        <form th:action="@{/register}" th:object="${usuario}" method="post">
                             <div class="form-group">
-                                <label for="nombre" class="sr-only">Nombre</label>
-                                <input type="text" th:field="*{nombre}" id="nombre" class="form-control" placeholder="Nombre completo" required>
-                                <small th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}" class="text-danger"></small>
+                                <label for="nombre" class="sr-only">Name</label>
+                                <input type="text" th:field="*{name}" id="nombre" class="form-control" placeholder="Nombre completo" required>
+                                <small th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></small>
                             </div>
                             <div class="form-group">
                                 <label for="email" class="sr-only">Email</label>

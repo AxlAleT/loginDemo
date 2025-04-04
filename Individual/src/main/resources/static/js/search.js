@@ -6,7 +6,9 @@ $(document).ready(function () {
     let allResults = [];
     let currentPage = 1;
     const resultsPerPage = 10;
-    let activeFilters = {};
+    let activeFilters = {
+        sortBy: 'relevance' // Default sort option
+    };
 
     // Configure CSRF header for all AJAX requests
     $.ajaxSetup({
@@ -22,20 +24,15 @@ $(document).ready(function () {
         const query = $('#basicQuery').val().trim();
         if (query) {
             resetPagination();
-            performSearch(query, false);
+            performSearch(query);
         }
-    });
-
-    $('#advancedSearchBtn').click(function () {
-        resetPagination();
-        performAdvancedSearch();
     });
 
     // Reset pagination when starting a new search
     function resetPagination() {
         allResults = [];
         currentPage = 1;
-        activeFilters = {};
+        // Keep the current sort option when resetting pagination
     }
 
     // Also search when pressing Enter in search fields
@@ -45,41 +42,33 @@ $(document).ready(function () {
         }
     });
 
-    // Add event listener for advanced search fields
-    $('#advancedQuery').keypress(function (e) {
-        if (e.which === 13) {
-            $('#advancedSearchBtn').click();
-        }
-    });
-
     // Load history when switching to the tab
     $('#history-tab').on('shown.bs.tab', function () {
         loadSearchHistory();
     });
 
-    // Function to perform basic search
-    function performSearch(query, isAdvanced = false) {
+    // Add sort event listeners for dropdown options
+    $('.sort-option').click(function() {
+        const sortOption = $(this).data('sort');
+        activeFilters.sortBy = sortOption;
+        
+        // Update the dropdown button text to show selected sort
+        $('#sortOptionsDropdown').text('Sort by: ' + $(this).text());
+        
+        // Re-display results with new sorting
+        currentPage = 1;
+        displayResultsWithPagination();
+    });
+
+    // Function to perform search
+    function performSearch(query) {
         // Show loading indicator
         $('#loader').show();
         $('#searchResults').empty();
         $('#resultsPagination').empty();
-        $('#resultsFilterOptions').hide();
 
-        const endpoint = isAdvanced ? '/api/search/advanced' : '/api/search';
+        const endpoint = '/api/search';
         const payload = {query: query};
-
-        // For advanced searches, add additional filters
-        if (isAdvanced) {
-            const authors = $('#authors').val();
-            const yearFrom = $('#yearFrom').val();
-            const yearTo = $('#yearTo').val();
-            const sort = $('#sort').val();
-
-            if (authors) payload.authors = authors;
-            if (yearFrom) payload.yearFrom = parseInt(yearFrom);
-            if (yearTo) payload.yearTo = parseInt(yearTo);
-            if (sort) payload.sort = sort;
-        }
 
         $.ajax({
             url: endpoint,
@@ -90,12 +79,6 @@ $(document).ready(function () {
                 // Store all results for pagination
                 allResults = response.articles || [];
                 displayResultsWithPagination();
-
-                // Show filters if we have results
-                if (allResults.length > 0) {
-                    generateFilterOptions();
-                    $('#resultsFilterOptions').show();
-                }
             },
             error: function (error) {
                 $('#searchResults').html(`
@@ -111,122 +94,9 @@ $(document).ready(function () {
         });
     }
 
-    // Function to perform advanced search
-    function performAdvancedSearch() {
-        const query = $('#advancedQuery').val().trim();
-        if (query) {
-            performSearch(query, true);
-        }
-    }
-
-    // Function to generate filter options based on current results
-    function generateFilterOptions() {
-        // Extract years and top authors from results
-        const years = new Set();
-        const authorsCount = {};
-
-        allResults.forEach(article => {
-            if (article.year) years.add(article.year);
-
-            if (article.authors && article.authors.length > 0) {
-                article.authors.forEach(author => {
-                    authorsCount[author] = (authorsCount[author] || 0) + 1;
-                });
-            }
-        });
-
-        // Sort years
-        const sortedYears = [...years].sort((a, b) => b - a);
-
-        // Get top authors (max 10)
-        const topAuthors = Object.entries(authorsCount)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 10)
-            .map(entry => entry[0]);
-
-        // Build filter UI
-        let filterHtml = `
-            <div class="filter-section mb-4">
-                <h5>Filter Results</h5>
-                <div class="row">
-                    <div class="col-md-4">
-                        <label for="filterYear">Year:</label>
-                        <select id="filterYear" class="form-control">
-                            <option value="">All Years</option>
-        `;
-
-        sortedYears.forEach(year => {
-            filterHtml += `<option value="${year}">${year}</option>`;
-        });
-
-        filterHtml += `
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="filterAuthor">Author:</label>
-                        <select id="filterAuthor" class="form-control">
-                            <option value="">All Authors</option>
-        `;
-
-        topAuthors.forEach(author => {
-            filterHtml += `<option value="${author}">${author}</option>`;
-        });
-
-        filterHtml += `
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="resultsSort">Sort by:</label>
-                        <select id="resultsSort" class="form-control">
-                            <option value="relevance">Relevance</option>
-                            <option value="citations">Citations (High to Low)</option>
-                            <option value="year">Year (Newest First)</option>
-                        </select>
-                    </div>
-                </div>
-                <button id="applyFilters" class="btn panel-btn btn-sm mt-2">Apply Filters</button>
-                <button id="resetFilters" class="btn panel-action-secondary btn-sm mt-2 ml-2">Reset</button>
-            </div>
-        `;
-
-        $('#resultsFilterOptions').html(filterHtml);
-
-        // Add event listeners for filters
-        $('#applyFilters').click(function() {
-            activeFilters = {
-                year: $('#filterYear').val(),
-                author: $('#filterAuthor').val(),
-                sortBy: $('#resultsSort').val()
-            };
-            currentPage = 1;
-            displayResultsWithPagination();
-        });
-
-        $('#resetFilters').click(function() {
-            $('#filterYear').val('');
-            $('#filterAuthor').val('');
-            $('#resultsSort').val('relevance');
-            activeFilters = {};
-            currentPage = 1;
-            displayResultsWithPagination();
-        });
-    }
-
     // Function to filter and sort results based on active filters
     function getFilteredResults() {
         let filtered = [...allResults];
-
-        // Apply year filter
-        if (activeFilters.year) {
-            filtered = filtered.filter(article => article.year == activeFilters.year);
-        }
-
-        // Apply author filter
-        if (activeFilters.author) {
-            filtered = filtered.filter(article =>
-                article.authors && article.authors.includes(activeFilters.author)
-            );
-        }
 
         // Apply sorting
         if (activeFilters.sortBy) {
@@ -509,16 +379,14 @@ $(document).ready(function () {
                 history.forEach(item => {
                     const date = new Date(item.searchDate).toLocaleString();
                     const query = item.query;
-                    const isAdvanced = query.startsWith('Advanced:');
-
+                    
                     historyHtml += `
                         <tr>
                             <td>${query}</td>
                             <td>${date}</td>
                             <td>
                                 <button class="btn panel-action-btn panel-action-primary repeat-search"
-                                        data-query="${query}"
-                                        data-advanced="${isAdvanced}">
+                                        data-query="${query}">
                                     Repeat
                                 </button>
                             </td>
@@ -536,26 +404,12 @@ $(document).ready(function () {
                 // Add event to repeat search
                 $('.repeat-search').click(function () {
                     const query = $(this).data('query');
-                    const isAdvanced = $(this).data('advanced') === true;
-
-                    // Clean the "Advanced:" prefix if it exists
-                    const cleanQuery = isAdvanced && query.startsWith('Advanced:')
-                        ? query.substring(9).trim()
-                        : query;
-
-                    if (isAdvanced) {
-                        $('#advanced-tab').tab('show');
-                        $('#advancedQuery').val(cleanQuery);
-                        setTimeout(() => {
-                            performAdvancedSearch();
-                        }, 300);
-                    } else {
-                        $('#basic-tab').tab('show');
-                        $('#basicQuery').val(cleanQuery);
-                        setTimeout(() => {
-                            $('#basicSearchBtn').click();
-                        }, 300);
-                    }
+                    
+                    $('#basic-tab').tab('show');
+                    $('#basicQuery').val(query);
+                    setTimeout(() => {
+                        $('#basicSearchBtn').click();
+                    }, 300);
                 });
             },
             error: function (error) {
