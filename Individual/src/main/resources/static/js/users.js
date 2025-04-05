@@ -30,12 +30,12 @@ function populateUsersTable(users) {
     $.each(users, function (index, user) {
         const row = $('<tr>').append(
             $('<td>').text(user.id),
-            $('<td>').text(user.nombre),
+            $('<td>').text(user.name),
             $('<td>').text(user.email),
-            $('<td>').text(user.rol),
+            $('<td>').text(user.role),
             $('<td>').append(
                 $('<button>').addClass('btn btn-sm btn-primary mr-1').text('Edit').on('click', function () {
-                    showEditModal(user.id, user.nombre, user.email, user.rol);
+                    showEditModal(user.id, user.name, user.email, user.role);
                 }),
                 $('<button>').addClass('btn btn-sm btn-danger').text('Delete').on('click', function () {
                     deleteUser(user.id);
@@ -72,10 +72,10 @@ function showEditModal(id, nombre, email, rol) {
 
 function createUser() {
     const userData = {
-        nombre: $('#name').val(),
+        name: $('#name').val(),
         email: $('#email').val(),
         password: $('#password').val(),
-        rol: $('#role').val()
+        role: $('#role').val()
     };
 
     $.ajax({
@@ -97,9 +97,9 @@ function createUser() {
 function updateUser() {
     const id = $('#userId').val();
     const userData = {
-        nombre: $('#name').val(),
+        name: $('#name').val(),
         email: $('#email').val(),
-        rol: $('#role').val()
+        role: $('#role').val()
     };
 
     // Only include password if entered

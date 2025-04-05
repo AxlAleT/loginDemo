@@ -36,7 +36,7 @@ public class AdminService {
 
         User user = new User();
         user.setEmail(userDTO.getEmail());
-        user.setNombre(userDTO.getNombre());
+        user.setName(userDTO.getName());
 
         // Codificar contraseña solo si se proporciona
         if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
@@ -46,10 +46,10 @@ public class AdminService {
         }
 
         // Validar rol
-        if (userDTO.getRol() != null && (userDTO.getRol().equals("ROLE_ADMIN") || userDTO.getRol().equals("ROLE_USER"))) {
-            user.setRol(userDTO.getRol());
+        if (userDTO.getRole() != null && (userDTO.getRole().equals("ROLE_ADMIN") || userDTO.getRole().equals("ROLE_USER"))) {
+            user.setRole(userDTO.getRole());
         } else {
-            user.setRol("ROLE_USER"); // Rol predeterminado
+            user.setRole("ROLE_USER"); // Rol predeterminado
         }
 
         User saved = userRepository.save(user);
@@ -66,7 +66,7 @@ public class AdminService {
         }
 
         user.setEmail(userDTO.getEmail());
-        user.setNombre(userDTO.getNombre());
+        user.setName(userDTO.getName());
 
         // Actualizar contraseña solo si se proporciona
         if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
@@ -74,8 +74,8 @@ public class AdminService {
         }
 
         // Validar rol
-        if (userDTO.getRol() != null && (userDTO.getRol().equals("ROLE_ADMIN") || userDTO.getRol().equals("ROLE_USER"))) {
-            user.setRol(userDTO.getRol());
+        if (userDTO.getRole() != null && (userDTO.getRole().equals("ROLE_ADMIN") || userDTO.getRole().equals("ROLE_USER"))) {
+            user.setRole(userDTO.getRole());
         }
 
         User saved = userRepository.save(user);
@@ -93,8 +93,8 @@ public class AdminService {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
         dto.setEmail(user.getEmail());
-        dto.setNombre(user.getNombre());
-        dto.setRol(user.getRol());
+        dto.setName(user.getName());
+        dto.setRole(user.getRole());
         // No incluir contraseña en la respuesta
         return dto;
     }

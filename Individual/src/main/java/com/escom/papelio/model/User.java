@@ -26,7 +26,7 @@ public class User {
 
     @Column(nullable = false)
     @NotEmpty(message = "El nombre no puede estar vacío")
-    private String nombre;
+    private String name;
 
-    private String rol;
+    private String role;
 }

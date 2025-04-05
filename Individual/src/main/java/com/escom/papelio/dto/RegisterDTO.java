@@ -20,5 +20,5 @@ public class RegisterDTO {
     private String password;
 
     @NotBlank(message = "El nombre es obligatorio")
-    private String nombre;
+    private String name;
 }

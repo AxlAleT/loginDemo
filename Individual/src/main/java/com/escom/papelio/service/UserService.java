@@ -22,8 +22,8 @@ public class UserService {
         User user = new User();
         user.setEmail(registerDTO.getEmail());
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
-        user.setNombre(registerDTO.getNombre());
-        user.setRol("ROLE_USER");
+        user.setName(registerDTO.getName());
+        user.setRole("ROLE_USER");
 
         userRepository.save(user);
     }
@@ -37,8 +37,8 @@ public class UserService {
         User admin = new User();
         admin.setEmail(email);
         admin.setPassword(passwordEncoder.encode(password));
-        admin.setNombre(nombre);
-        admin.setRol("ROLE_ADMIN");
+        admin.setName(nombre);
+        admin.setRole("ROLE_ADMIN");
 
         userRepository.save(admin);
     }
@@ -56,7 +56,7 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User no encontrado"));
 
         // Update user details
-        user.setNombre(userDTO.getNombre());
+        user.setName(userDTO.getName());
 
         // Optional: update email (requires additional validation)
         if (!currentEmail.equals(userDTO.getEmail()) &&
@@ -84,8 +84,8 @@ public class UserService {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
         dto.setEmail(user.getEmail());
-        dto.setNombre(user.getNombre());
-        dto.setRol(user.getRol());
+        dto.setName(user.getName());
+        dto.setRole(user.getRole());
         // Don't set password in DTO for security
         return dto;
     }
