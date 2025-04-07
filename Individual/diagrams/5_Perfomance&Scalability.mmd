@@ -1,0 +1,48 @@
+flowchart TB
+    subgraph "Performance & Scalability"
+        subgraph "Actors"
+            architects["System Architects"]
+        end
+        
+        subgraph "API Response Caching"
+            ARC1["Cache frequent API responses (e.g., top searches)"]
+            ARC2["Spring Cache with Caffeine/Redis"]
+            ARC3["Evict stale data with @CacheEvict"]
+            ARC1 --> ARC2
+            ARC2 --> ARC3
+        end
+
+        subgraph "Concurrent User Sessions"
+            CUS1["Support 1k+ authenticated sessions"]
+            CUS2["Spring Session with Redis for distributed session storage"]
+            CUS1 --> CUS2
+        end
+
+        subgraph "Load-Tolerant Authentication"
+            LTA1["Handle login spikes without downtime"]
+            LTA2["Optimize Spring Security filter chain"]
+            LTA3["Disable unnecessary filters"]
+            LTA1 --> LTA2
+            LTA2 --> LTA3
+        end
+
+        subgraph "Health Monitoring"
+            HM1["Track API latency, errors, and uptime"]
+            HM2["Expose Spring Boot Actuator endpoints"]
+            HM3["Secure with @PreAuthorize"]
+            HM1 --> HM2
+            HM2 --> HM3
+        end
+    end
+    
+    %% Connections
+    architects --> ARC1
+    architects --> CUS1
+    architects --> LTA1
+    architects --> HM1
+
+    classDef section fill:#e6f3ff,stroke:#7fb1d3,stroke-width:2px
+    classDef component fill:#f9f9f9,stroke:#ccc,stroke-width:1px
+
+    class architects section
+    class ARC1,ARC2,ARC3,CUS1,CUS2,LTA1,LTA2,LTA3,HM1,HM2,HM3 component
