@@ -348,3 +348,58 @@ h1, h2, h3, h4, h5, h6,
     z-index: 1000;
     transition: color 0.3s ease;
 }
+
+
+/* Theme-specific image display */
+.login-image-container,
+.brand-wrapper {
+    position: relative;
+}
+
+.login-image-container {
+    overflow: hidden; /* Contain overflowing image parts */
+}
+
+.theme-light-image,
+.theme-dark-image,
+.logo-light,
+.logo-dark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; /* Force consistent width */
+    height: 100%; /* Force consistent height */
+    object-fit: cover; /* Maintain aspect ratio while covering container */
+    transition: opacity 0.3s ease;
+}
+
+.brand-wrapper .logo {
+    position: relative;
+    height: 37px;
+    width: auto;
+}
+
+/* Light theme (default) */
+.theme-light-image,
+.logo-light {
+    opacity: 1;
+}
+
+.theme-dark-image,
+.logo-dark {
+    opacity: 0;
+}
+
+/* Dark theme */
+[data-theme="dark"] .theme-light-image,
+[data-theme="dark"] .logo-light {
+    opacity: 0;
+}
+
+[data-theme="dark"] .theme-dark-image,
+[data-theme="dark"] .logo-dark {
+    opacity: 1;
+}
+
+/*# sourceMappingURL=login.css.map */
+

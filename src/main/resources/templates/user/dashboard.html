@@ -19,8 +19,9 @@
         <div class="card-body">
             <div class="panel-header">
                 <div>
-                    <div class="panel-wrapper">
-                        <img th:src="@{/images/logo.png}" alt="logo" class="logo">
+                    <div class="brand-wrapper">
+                        <img th:src="@{/images/logo.png}" alt="logo" class="logo logo-light">
+                        <img th:src="@{/images/logoDark.png}" alt="logo" class="logo logo-dark">
                     </div>
                     <h2 class="panel-card-title">User Dashboard</h2>
                     <p class="user-welcome">Welcome, <span sec:authentication="name"></span></p>
@@ -62,18 +63,14 @@
     </div>
 </div>
 <script>
-    initThemeManager();
-
-    function initThemeManager() {
-        // Check for saved theme preference or use preferred color scheme
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        } else {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-            localStorage.setItem('theme', prefersDark ? 'dark' : 'light');
-        }
+    // Immediately set theme on page load, before DOM is fully constructed
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    } else {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+        localStorage.setItem('theme', prefersDark ? 'dark' : 'light');
     }
 </script>
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>

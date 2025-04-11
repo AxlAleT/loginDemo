@@ -16,14 +16,16 @@
     <div class="container">
         <div class="card login-card panel-card">
             <div class="row no-gutters">
-                <div class="col-md-5">
-                    <img th:src="@{/images/login.jpg}" alt="profile" class="login-card-img">
+                <div class="col-md-5 login-image-container">
+                    <img th:src="@{/images/login.jpg}" alt="login" class="login-card-img theme-light-image">
+                    <img th:src="@{/images/loginDark.png}" alt="login" class="login-card-img theme-dark-image">
                 </div>
                 <div class="col-md-7">
                     <div class="card-body">
                         <div class="panel-header">
                             <div class="brand-wrapper">
-                                <img th:src="@{/images/logo.png}" alt="logo" class="logo">
+                                <img th:src="@{/images/logo.png}" alt="logo" class="logo logo-light">
+                                <img th:src="@{/images/logoDark.png}" alt="logo" class="logo logo-dark">
                             </div>
                             <a href="/user" class="btn panel-action-secondary">Back to Dashboard</a>
                         </div>

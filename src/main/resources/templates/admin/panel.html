@@ -18,8 +18,9 @@
         <div class="card-body">
             <div class="panel-header">
                 <div>
-                    <div class="panel-wrapper">
-                        <img th:src="@{/images/logo.png}" alt="logo" class="logo">
+                    <div class="brand-wrapper">
+                        <img th:src="@{/images/logo.png}" alt="logo" class="logo logo-light">
+                        <img th:src="@{/images/logoDark.png}" alt="logo" class="logo logo-dark">
                     </div>
                     <h2 class="panel-card-title">Admin Panel</h2>
                     <p class="user-welcome">Welcome, <span sec:authentication="name"></span></p>
