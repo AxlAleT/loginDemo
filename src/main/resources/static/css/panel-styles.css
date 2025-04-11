@@ -1,0 +1,350 @@
+:root {
+    /* Light theme (default) */
+    --background-color: #d0d0ce;
+    --text-color: #000;
+    --card-bg: #fff;
+    --secondary-text: #919aa3;
+    --border-color: #d5dae2;
+    --heading-color: #05344f;
+    --link-color: #0d2366;
+    --button-bg: #000;
+    --button-text: #fff;
+    --button-hover-bg: transparent;
+    --button-hover-text: #000;
+    --shadow-color: rgba(172, 168, 168, 0.43);
+    --table-header-bg: #f8f9fa;
+    --table-hover-bg: #f8f9fa;
+    
+    /* Button colors */
+    --danger-bg: #dc3545;
+    --danger-text: #fff;
+    --danger-hover-text: #dc3545;
+    --secondary-bg: #6c757d;
+    --secondary-text: #fff;
+    --secondary-hover-text: #6c757d;
+    
+    /* Alert colors */
+    --alert-success-bg: #d4edda;
+    --alert-success-text: #155724;
+    --alert-success-border: #c3e6cb;
+    --alert-danger-bg: #f8d7da;
+    --alert-danger-text: #721c24;
+    --alert-danger-border: #f5c6cb;
+    
+    /* Panel header */
+    --panel-header-border: #e9ecef;
+    --user-welcome-text: #6c757d;
+}
+
+[data-theme="dark"] {
+    /* Dark theme */
+    --background-color: #121212;
+    --text-color: #ffffff;
+    --card-bg: #1e1e1e;
+    --secondary-text: #b0b0b0;
+    --border-color: #333333;
+    --heading-color: #4da8da;
+    --link-color: #64b5f6;
+    --button-bg: #64b5f6;
+    --button-text: #121212;
+    --button-hover-bg: transparent;
+    --button-hover-text: #64b5f6;
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --table-header-bg: #252525;
+    --table-hover-bg: #252525;
+    
+    /* Button colors */
+    --danger-bg: #ad2c39;
+    --danger-text: #ffffff;
+    --danger-hover-text: #ff5a5a;
+    --secondary-bg: #4d5359;
+    --secondary-text: #ffffff;
+    --secondary-hover-text: #adb5bd;
+    
+    /* Alert colors */
+    --alert-success-bg: #0d3a1a;
+    --alert-success-text: #8cd98c;
+    --alert-success-border: #176632;
+    --alert-danger-bg: #3a0d14;
+    --alert-danger-text: #dd8f97;
+    --alert-danger-border: #661722;
+    
+    /* Panel header */
+    --panel-header-border: #333333;
+    --user-welcome-text: #b0b0b0;
+}
+
+body {
+    font-family: "Karla", sans-serif;
+    background-color: var(--background-color);
+    min-height: 100vh;
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.panel-wrapper {
+    margin-bottom: 19px;
+}
+
+.panel-wrapper .logo {
+    height: 37px;
+}
+
+/* Estilos para títulos */
+h1, h2, h3, h4, h5, h6,
+.panel-card-title,
+.summary-card h4,
+.panel-header h2 {
+    font-family: "Karla", sans-serif;
+    font-weight: bold;
+    color: var(--heading-color);
+    transition: color 0.3s ease;
+}
+
+/* Panel General */
+.panel-card {
+    border: 0;
+    border-radius: 27.5px;
+    box-shadow: 0 10px 30px 0 var(--shadow-color);
+    overflow: hidden;
+    background-color: var(--card-bg);
+    margin-bottom: 30px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 95%;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.panel-card .card-body {
+    padding: 40px 60px;
+}
+
+@media (max-width: 422px) {
+    .panel-card .card-body {
+        padding: 30px 24px;
+    }
+}
+
+/* Formato de textos en paneles */
+.panel-card-title {
+    font-size: 25px;
+    margin-bottom: 23px;
+}
+
+/* Campos de formulario */
+.panel-card .form-control {
+    border: 1px solid var(--border-color);
+    padding: 15px 25px;
+    margin-bottom: 20px;
+    min-height: 45px;
+    font-size: 13px;
+    line-height: 15;
+    font-weight: normal;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    transition: border-color 0.3s ease, color 0.3s ease, background-color 0.3s ease;
+}
+
+.panel-card .form-control::placeholder {
+    color: var(--secondary-text);
+}
+
+/* Botones */
+.panel-btn {
+    padding: 13px 20px 12px;
+    background-color: var(--button-bg);
+    border-radius: 4px;
+    font-size: 17px;
+    font-weight: bold;
+    line-height: 20px;
+    color: var(--button-text);
+    margin-bottom: 24px;
+    transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
+}
+
+.panel-btn:hover {
+    border: 1px solid var(--button-hover-text);
+    background-color: var(--button-hover-bg);
+    color: var(--button-hover-text);
+}
+
+/* Enlaces */
+.panel-link {
+    font-size: 14px;
+    color: var(--secondary-text);
+    margin-bottom: 12px;
+    transition: color 0.3s ease;
+}
+
+/* Pie de tarjeta */
+.panel-card-footer-text {
+    font-size: 16px;
+    color: var(--link-color);
+    margin-bottom: 30px;
+    transition: color 0.3s ease;
+}
+
+@media (max-width: 767px) {
+    .panel-card-footer-text {
+        margin-bottom: 24px;
+    }
+}
+
+.panel-card-footer-nav a {
+    font-size: 14px;
+    color: var(--secondary-text);
+    transition: color 0.3s ease;
+}
+
+/* Tabla */
+.panel-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.panel-table th,
+.panel-table td {
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+.panel-table th {
+    background-color: var(--table-header-bg);
+    font-weight: bold;
+    color: var(--heading-color);
+}
+
+.panel-table tbody tr:hover {
+    background-color: var(--table-hover-bg);
+}
+
+/* Botones de acción */
+.panel-action-btn {
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
+}
+
+.panel-action-primary {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+}
+
+.panel-action-primary:hover {
+    background-color: var(--button-hover-bg);
+    color: var(--button-hover-text);
+    border: 1px solid var(--button-hover-text);
+}
+
+.panel-action-danger {
+    background-color: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.panel-action-danger:hover {
+    background-color: transparent;
+    color: var(--danger-hover-text);
+    border: 1px solid var(--danger-hover-text);
+}
+
+.panel-action-secondary {
+    background-color: var(--secondary-bg);
+    color: var(--secondary-text);
+}
+
+.panel-action-secondary:hover {
+    background-color: transparent;
+    color: var(--secondary-hover-text);
+    border: 1px solid var(--secondary-hover-text);
+}
+
+/* Tarjetas de resumen */
+.summary-card {
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 15px var(--shadow-color);
+    text-align: center;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.summary-card h4 {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.summary-card .number {
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+.summary-card p {
+    color: var(--secondary-text);
+    margin-top: 10px;
+    transition: color 0.3s ease;
+}
+
+/* Alertas */
+.panel-alert {
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
+}
+
+.panel-alert-success {
+    background-color: var(--alert-success-bg);
+    color: var(--alert-success-text);
+    border: 1px solid var(--alert-success-border);
+}
+
+.panel-alert-danger {
+    background-color: var(--alert-danger-bg);
+    color: var(--alert-danger-text);
+    border: 1px solid var(--alert-danger-border);
+}
+
+/* Encabezados y navegación */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid var(--panel-header-border);
+    transition: border-bottom 0.3s ease;
+}
+
+.panel-header h2 {
+    font-size: 28px;
+    margin-bottom: 0;
+}
+
+.user-welcome {
+    font-size: 16px;
+    color: var(--user-welcome-text);
+    transition: color 0.3s ease;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 24px;
+    z-index: 1000;
+    transition: color 0.3s ease;
+}
