@@ -41,7 +41,6 @@
 |----------|------|--------------|
 | **Semantic Scholar-Based Recommendations** | Fetch related articles via recommendation API | Circuit breakers (Resilience4j) for fault tolerance |
 | **Trending Research Alerts** | Highlight popular articles in a field | Scheduled API polling with `@Scheduled`, cache results in Redis |
-| **Collaborative Filtering** | Suggest articles based on similar users’ activity | Integrate lightweight ML libraries (e.g., Apache Mahout) with Spring Batch |
 
 ---
 
