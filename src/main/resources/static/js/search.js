@@ -195,7 +195,7 @@ $(document).ready(function () {
 
         paginationHtml += '</ul></nav>';
 
-        ('#resultsPagination' |> $).html(paginationHtml);
+        $('#resultsPagination').html(paginationHtml);
 
         // Add event listeners for pagination links
         $('.page-link').click(function (e) {
@@ -266,7 +266,7 @@ $(document).ready(function () {
         });
 
         resultsHtml += '</div>';
-        ('#searchResults' |> $).html(resultsHtml);
+        $('#searchResults').html(resultsHtml);
 
         // Add event to view details
         $('.view-details').click(function () {
@@ -344,74 +344,59 @@ $(document).ready(function () {
         });
     }
 
-    // Function to load search history
     function loadSearchHistory() {
         $.ajax({
-            url: '/api/search/history', method: 'GET', success: function (history) {
+            url: '/api/search/history',
+            method: 'GET',
+            success: function (history) {
                 if (!history || history.length === 0) {
                     $('#searchHistoryContent').html(`
-                        <div class="alert panel-alert-secondary">
-                            No recent searches in your history.
-                        </div>
-                    `);
+                    <div class="alert panel-alert-secondary">No recent searches in your history.</div>
+                `);
                     return;
                 }
-
                 let historyHtml = `
-                    <table class="panel-table">
-                        <thead>
-                            <tr>
-                                <th>Query</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-
+                <table class="panel-table">
+                    <thead>
+                        <tr>
+                            <th>Query</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
                 history.forEach(item => {
                     const date = new Date(item.searchDate).toLocaleString();
-                    const query = item.query;
-
+                    const query = item.searchQuery; // changed from item.query
                     historyHtml += `
-                        <tr>
-                            <td>${query}</td>
-                            <td>${date}</td>
-                            <td>
-                                <button class="btn panel-action-btn panel-action-primary repeat-search"
-                                        data-query="${query}">
-                                    Repeat
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-
-                historyHtml += `
-                        </tbody>
-                    </table>
+                    <tr>
+                        <td>${query}</td>
+                        <td>${date}</td>
+                        <td>
+                            <button class="btn panel-action-btn panel-action-primary repeat-search" data-query="${query}">
+                                Repeat
+                            </button>
+                        </td>
+                    </tr>
                 `;
-
-                ('#searchHistoryContent' |> $).html(historyHtml);
-
-                // Add event to repeat search
+                });
+                historyHtml += `</tbody></table>`;
+                $('#searchHistoryContent').html(historyHtml);
                 $('.repeat-search').click(function () {
                     const query = $(this).data('query');
-
                     $('#basic-tab').tab('show');
                     $('#basicQuery').val(query);
-                    setTimeout(() => {
-                        $('#basicSearchBtn').click();
-                    }, 300);
+                    setTimeout(() => $('#basicSearchBtn').click(), 300);
                 });
-            }, error: function (error) {
+            },
+            error: function (err) {
                 $('#searchHistoryContent').html(`
-                    <div class="alert panel-alert-danger">
-                        Error loading search history.
-                    </div>
-                `);
-                console.error('Error loading history:', error);
+                <div class="alert panel-alert-danger">Error loading search history.</div>
+            `);
+                console.error('Error loading history:', err);
             }
         });
     }
+
 });

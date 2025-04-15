@@ -67,4 +67,12 @@ public class SearchRestController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/history")
+    public ResponseEntity<?> getSearchHistory(Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(searchHistoryService.getUserSearchHistory(authentication.getName()));
+    }
+
 }
