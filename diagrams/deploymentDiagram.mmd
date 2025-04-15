@@ -11,11 +11,12 @@ flowchart TB
                 jdk["Eclipse Temurin JDK 21"]
                 springapp["Spring Boot Application"]
                 
-                subgraph "Application Components"
-                    articleSearch["Basic Article Search"]
+                subgraph "Application Services"
+                    articleSearch["SemanticScholarService"]
                 end
                 
                 subgraph "Configuration Files"
+                    confPack["Configuration Package"]
                     appProps["application.properties"]
                     pom["pom.xml"]
                 end
@@ -48,6 +49,7 @@ flowchart TB
     
     springapp -->|"Configured By"|appProps
     springapp -->|"Built From"|pom
+    springapp -->|"set up by"|confPack
 
     classDef container fill:#e6f3ff,stroke:#7fb1d3,stroke-width:2px
     classDef component fill:#f9f9f9,stroke:#ccc,stroke-width:1px
@@ -60,5 +62,5 @@ flowchart TB
     class articleSearch component
     class postgres database
     class pgdata volume
-    class appProps,pom file
+    class confPack,appProps,pom file
     class scholar,crossref external
