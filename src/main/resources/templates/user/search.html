@@ -1,17 +1,16 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      lang="en">
+<html data-bs-theme="light" lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="_csrf" th:content="${_csrf.token}" />
-    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Article Search - Papelio</title>
     <link href="https://fonts.googleapis.com/css?family=Karla:400,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/panel-styles.css}">
-    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.ico}">
+    <link rel="icon" th:href="@{/images/favicon.ico}" type="image/x-icon">
     <link rel="stylesheet" th:href="@{/css/search.css}">
 </head>
 
@@ -22,29 +21,30 @@
             <div class="panel-header">
                 <div>
                     <div class="brand-wrapper">
-                        <img th:src="@{/images/logo.png}" alt="logo" class="logo logo-light">
-                        <img th:src="@{/images/logoDark.png}" alt="logo" class="logo logo-dark">
+                        <img alt="logo" class="logo logo-light" th:src="@{/images/logo.png}">
+                        <img alt="logo" class="logo logo-dark" th:src="@{/images/logoDark.png}">
                     </div>
                 </div>
-                
+
                 <!-- Navigation Tabs -->
                 <ul class="nav nav-tabs" id="searchTabs" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link active" id="basic-tab" data-toggle="tab" href="#basic" role="tab">Search</a>
+                        <a class="nav-link active" data-toggle="tab" href="#basic" id="basic-tab" role="tab">Search</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="history-tab" data-toggle="tab" href="#history" role="tab">History</a>
+                        <a class="nav-link" data-toggle="tab" href="#history" id="history-tab" role="tab">History</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/user}">Dashboard</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-expanded="false">Account</a>
+                        <a aria-expanded="false" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"
+                           role="button">Account</a>
                         <div class="dropdown-menu">
                             <a class="dropdown-item" th:href="@{/user/profile}">Profile</a>
-                            <form id="logout-form" th:action="@{/logout}" method="post">
-                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                <button type="submit" class="dropdown-item">Log Out</button>
+                            <form id="logout-form" method="post" th:action="@{/logout}">
+                                <input th:name="${_csrf.parameterName}" th:value="${_csrf.token}" type="hidden"/>
+                                <button class="dropdown-item" type="submit">Log Out</button>
                             </form>
                         </div>
                     </li>
@@ -56,16 +56,21 @@
                 <!-- Basic Search -->
                 <div class="tab-pane fade show active" id="basic" role="tabpanel">
                     <div class="search-input-group mb-3">
-                        <input type="text" id="basicQuery" class="form-control" placeholder="Enter keywords to search for articles..." aria-label="Search query" aria-describedby="basic-search-button">
+                        <input aria-describedby="basic-search-button" aria-label="Search query" class="form-control"
+                               id="basicQuery" placeholder="Enter keywords to search for articles..."
+                               type="text">
                         <div class="search-actions">
-                            <button id="basicSearchBtn" class="btn panel-btn" type="button">Search</button>
+                            <button class="btn panel-btn" id="basicSearchBtn" type="button">Search</button>
                             <div class="dropdown sort-dropdown">
-                                <button class="btn dropdown-toggle" type="button" id="sortOptionsDropdown" data-toggle="dropdown" aria-expanded="false">
+                                <button aria-expanded="false" class="btn dropdown-toggle" data-toggle="dropdown"
+                                        id="sortOptionsDropdown" type="button">
                                     Sort by
                                 </button>
-                                <div class="dropdown-menu" aria-labelledby="sortOptionsDropdown">
-                                    <button class="dropdown-item sort-option" data-sort="relevance">Order by relevance</button>
-                                    <button class="dropdown-item sort-option" data-sort="citations">Order by citations</button>
+                                <div aria-labelledby="sortOptionsDropdown" class="dropdown-menu">
+                                    <button class="dropdown-item sort-option" data-sort="relevance">Order by relevance
+                                    </button>
+                                    <button class="dropdown-item sort-option" data-sort="citations">Order by citations
+                                    </button>
                                     <button class="dropdown-item sort-option" data-sort="year">Order by year</button>
                                 </div>
                             </div>
@@ -82,15 +87,15 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Loader Indicator -->
-            <div id="loader" class="loader"></div>
+            <div class="loader" id="loader"></div>
 
             <!-- Search Results -->
-            <div id="searchResults" class="search-results mt-4"></div>
-            
+            <div class="search-results mt-4" id="searchResults"></div>
+
             <!-- Pagination Controls -->
-            <div id="resultsPagination" class="mt-4">
+            <div class="mt-4" id="resultsPagination">
                 <!-- Pagination will be inserted by JavaScript -->
             </div>
         </div>
@@ -98,12 +103,12 @@
 </div>
 
 <!-- Article Details Modal -->
-<div class="modal fade" id="articleModal" tabindex="-1" aria-hidden="true">
+<div aria-hidden="true" class="modal fade" id="articleModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Article Details</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -111,17 +116,17 @@
                 <!-- Article details will be loaded here -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn panel-action-secondary" data-dismiss="modal">Close</button>
-                <a id="viewFullArticle" href="#" target="_blank" class="btn panel-action-primary">View Full Article</a>
+                <button class="btn panel-action-secondary" data-dismiss="modal" type="button">Close</button>
+                <a class="btn panel-action-primary" href="#" id="viewFullArticle" target="_blank">View Full Article</a>
             </div>
         </div>
     </div>
 </div>
-
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script th:src="@{/js/themeLoader.js}"></script>
+<script th:src="@{/js/search.js}"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-<script th:src="@{/js/search.js}"></script>
 
 </body>
 </html>

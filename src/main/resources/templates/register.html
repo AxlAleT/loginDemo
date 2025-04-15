@@ -1,61 +1,74 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html data-bs-theme="light" lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
     <title>Register Template</title>
     <link href="https://fonts.googleapis.com/css?family=Karla:400,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/login.css}">
-    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.ico}">
+    <link rel="icon" th:href="@{/images/favicon.ico}" type="image/x-icon">
 </head>
 <body>
 <main class="d-flex align-items-center min-vh-100 py-3 py-md-0">
     <div class="container">
         <div class="card login-card">
             <div class="row no-gutters">
-                <div class="col-md-5">
-                    <img th:src="@{/images/login.jpg}" alt="login" class="login-card-img">
+                <div class="col-md-5 login-image-container">
+                    <img alt="login" class="login-card-img theme-light-image" onerror="this.onerror=null; console.error('Failed to load light theme image:', this.src);"
+                         th:src="@{/images/login.jpg}">
+                    <img alt="login" class="login-card-img theme-dark-image" onerror="this.onerror=null; console.error('Failed to load dark theme image:', this.src);"
+                         th:src="@{/images/loginDark.png}">
                 </div>
                 <div class="col-md-7">
                     <div class="card-body">
                         <div class="brand-wrapper">
-                            <img th:src="@{/images/logo.png}" alt="logo" class="logo logo-light">
-                            <img th:src="@{/images/logoDark.png}" alt="logo" class="logo logo-dark">
+                            <img alt="logo" class="logo logo-light" th:src="@{/images/logo.png}">
+                            <img alt="logo" class="logo logo-dark" th:src="@{/images/logoDark.png}">
                         </div>
                         <p class="login-card-description">Create your account</p>
 
                         <!-- Mensajes de error o éxito -->
-                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-                        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+                        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
 
                         <!-- Formulario de registro -->
-                        <form th:action="@{/register}" th:object="${usuario}" method="post">
+                        <form method="post" th:action="@{/register}" th:object="${usuario}">
                             <div class="form-group">
-                                <label for="nombre" class="sr-only">Name</label>
-                                <input type="text" th:field="*{name}" id="nombre" class="form-control" placeholder="Nombre completo" required>
-                                <small th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></small>
+                                <label class="sr-only" for="nombre">Name</label>
+                                <input class="form-control" id="nombre" placeholder="Nombre completo" required
+                                       th:field="*{name}" type="text">
+                                <small class="text-danger" th:errors="*{name}"
+                                       th:if="${#fields.hasErrors('name')}"></small>
                             </div>
                             <div class="form-group">
-                                <label for="email" class="sr-only">Email</label>
-                                <input type="email" th:field="*{email}" id="email" class="form-control" placeholder="Email address" required>
-                                <small th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger"></small>
+                                <label class="sr-only" for="email">Email</label>
+                                <input class="form-control" id="email" placeholder="Email address" required
+                                       th:field="*{email}" type="email">
+                                <small class="text-danger" th:errors="*{email}"
+                                       th:if="${#fields.hasErrors('email')}"></small>
                             </div>
                             <div class="form-group mb-4">
-                                <label for="password" class="sr-only">Password</label>
-                                <input type="password" th:field="*{password}" id="password" class="form-control" placeholder="***********" required>
-                                <small th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger"></small>
+                                <label class="sr-only" for="password">Password</label>
+                                <input class="form-control" id="password" placeholder="***********" required
+                                       th:field="*{password}" type="password">
+                                <small class="text-danger" th:errors="*{password}"
+                                       th:if="${#fields.hasErrors('password')}"></small>
                             </div>
                             <div class="form-group mb-4">
-                                <label for="confirmPassword" class="sr-only">Confirm Password</label>
-                                <input type="password" name="confirmPassword" id="confirmPassword" class="form-control" placeholder="Confirm password" required>
+                                <label class="sr-only" for="confirmPassword">Confirm Password</label>
+                                <input class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm password"
+                                       required type="password">
                             </div>
-                            <input name="register" id="register" class="btn btn-block login-btn mb-4" type="submit" value="Register">
+                            <input class="btn btn-block login-btn mb-4" id="register" name="register" type="submit"
+                                   value="Register">
                         </form>
 
-                        <p class="login-card-footer-text">Already have an account? <a th:href="@{/login}" class="text-reset">Login here</a></p>
+                        <p class="login-card-footer-text">Already have an account? <a class="text-reset"
+                                                                                      th:href="@{/login}">Login here</a>
+                        </p>
                         <nav class="login-card-footer-nav">
                             <a href="#!">Terms of use.</a>
                             <a href="#!">Privacy policy</a>
@@ -66,9 +79,8 @@
         </div>
     </div>
 </main>
-
-<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script th:src="@{/js/themeLoader.js}"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
 </body>

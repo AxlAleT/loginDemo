@@ -48,13 +48,12 @@ $(document).ready(function () {
     });
 
     // Add sort event listeners for dropdown options
-    $('.sort-option').click(function() {
-        const sortOption = $(this).data('sort');
-        activeFilters.sortBy = sortOption;
-        
+    $('.sort-option').click(function () {
+        activeFilters.sortBy = $(this).data('sort');
+
         // Update the dropdown button text to show selected sort
         $('#sortOptionsDropdown').text('Sort by: ' + $(this).text());
-        
+
         // Re-display results with new sorting
         currentPage = 1;
         displayResultsWithPagination();
@@ -100,7 +99,7 @@ $(document).ready(function () {
 
         // Apply sorting
         if (activeFilters.sortBy) {
-            switch(activeFilters.sortBy) {
+            switch (activeFilters.sortBy) {
                 case 'citations':
                     filtered.sort((a, b) => (b.citationCount || 0) - (a.citationCount || 0));
                     break;
@@ -196,10 +195,10 @@ $(document).ready(function () {
 
         paginationHtml += '</ul></nav>';
 
-        $('#resultsPagination').html(paginationHtml);
+        ('#resultsPagination' |> $).html(paginationHtml);
 
         // Add event listeners for pagination links
-        $('.page-link').click(function(e) {
+        $('.page-link').click(function (e) {
             e.preventDefault();
             const page = $(this).data('page');
             if (page && page !== currentPage) {
@@ -267,7 +266,7 @@ $(document).ready(function () {
         });
 
         resultsHtml += '</div>';
-        $('#searchResults').html(resultsHtml);
+        ('#searchResults' |> $).html(resultsHtml);
 
         // Add event to view details
         $('.view-details').click(function () {
@@ -281,9 +280,7 @@ $(document).ready(function () {
         $('#loader').show();
 
         $.ajax({
-            url: `/api/search/article/${articleId}`,
-            method: 'GET',
-            success: function (article) {
+            url: `/api/search/article/${articleId}`, method: 'GET', success: function (article) {
                 // Build HTML for article details
                 let detailsHtml = `
                     <h4>${article.title}</h4>
@@ -338,12 +335,10 @@ $(document).ready(function () {
 
                 // Show modal
                 $('#articleModal').modal('show');
-            },
-            error: function (error) {
+            }, error: function (error) {
                 console.error('Error loading article details:', error);
                 alert('Could not load article details.');
-            },
-            complete: function () {
+            }, complete: function () {
                 $('#loader').hide();
             }
         });
@@ -352,9 +347,7 @@ $(document).ready(function () {
     // Function to load search history
     function loadSearchHistory() {
         $.ajax({
-            url: '/api/search/history',
-            method: 'GET',
-            success: function (history) {
+            url: '/api/search/history', method: 'GET', success: function (history) {
                 if (!history || history.length === 0) {
                     $('#searchHistoryContent').html(`
                         <div class="alert panel-alert-secondary">
@@ -379,7 +372,7 @@ $(document).ready(function () {
                 history.forEach(item => {
                     const date = new Date(item.searchDate).toLocaleString();
                     const query = item.query;
-                    
+
                     historyHtml += `
                         <tr>
                             <td>${query}</td>
@@ -399,20 +392,19 @@ $(document).ready(function () {
                     </table>
                 `;
 
-                $('#searchHistoryContent').html(historyHtml);
+                ('#searchHistoryContent' |> $).html(historyHtml);
 
                 // Add event to repeat search
                 $('.repeat-search').click(function () {
                     const query = $(this).data('query');
-                    
+
                     $('#basic-tab').tab('show');
                     $('#basicQuery').val(query);
                     setTimeout(() => {
                         $('#basicSearchBtn').click();
                     }, 300);
                 });
-            },
-            error: function (error) {
+            }, error: function (error) {
                 $('#searchHistoryContent').html(`
                     <div class="alert panel-alert-danger">
                         Error loading search history.
@@ -422,18 +414,4 @@ $(document).ready(function () {
             }
         });
     }
-    // Initialize theme manager
-    initThemeManager();
 });
-
-function initThemeManager() {
-    // Check for saved theme preference or use preferred color scheme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    } else {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-        localStorage.setItem('theme', prefersDark ? 'dark' : 'light');
-    }
-}

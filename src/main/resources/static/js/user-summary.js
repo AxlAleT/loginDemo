@@ -1,28 +1,13 @@
 $(document).ready(function () {
     loadUserSummary(); // Load user summary data when the page is ready
-    initThemeManager();
 });
 
-function initThemeManager() {
-    // Check for saved theme preference or use preferred color scheme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    } else {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-        localStorage.setItem('theme', prefersDark ? 'dark' : 'light');
-    }
-}
 function loadUserSummary() {
     $.ajax({
         url: '/api/admin/users', // Same endpoint to get all users
-        type: 'GET',
-        dataType: 'json',
-        success: function (usuarios) {
+        type: 'GET', dataType: 'json', success: function (usuarios) {
             updateUserSummaryTable(usuarios);
-        },
-        error: function () {
+        }, error: function () {
             showAlert('#errorAlert', 'Error al cargar el resumen de usuarios.');
         }
     });

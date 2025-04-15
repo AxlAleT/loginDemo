@@ -1,17 +1,13 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Cache DOM elements
     const saveButton = document.getElementById('save-profile-btn');
     const profileForm = document.getElementById('profile-form');
     const passwordField = document.getElementById('password');
     const passwordConfirmField = document.getElementById('password-confirm');
     const profileModal = $('#profileModal');
-    const themeToggle = document.getElementById('theme-toggle');
-
-    // Theme management
-    initThemeManager();
 
     // Form submission
-    saveButton.addEventListener('click', function(e) {
+    saveButton.addEventListener('click', function (e) {
         e.preventDefault();
 
         // Clear previous errors
@@ -82,11 +78,9 @@ document.addEventListener('DOMContentLoaded', function() {
         saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
 
         fetch('/api/user/profile', {
-            method: 'PUT',
-            headers: {
+            method: 'PUT', headers: {
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(userData)
+            }, body: JSON.stringify(userData)
         })
             .then(response => {
                 if (!response.ok) {
@@ -137,31 +131,6 @@ document.addEventListener('DOMContentLoaded', function() {
             alert.classList.remove('show');
             setTimeout(() => alert.remove(), 150);
         }, 5000);
-    }
-
-    // Theme Management Functions
-    function initThemeManager() {
-        // Check for saved theme preference or use preferred color scheme
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            themeToggle.checked = savedTheme === 'dark';
-        } else {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-            themeToggle.checked = prefersDark;
-            localStorage.setItem('theme', prefersDark ? 'dark' : 'light');
-        }
-
-        // Set up event listener for theme toggle
-        themeToggle.addEventListener('change', function() {
-            const theme = this.checked ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-            
-            // Show theme change alert
-            showAlert('info', `Theme changed to ${theme} mode`);
-        });
     }
 });
 

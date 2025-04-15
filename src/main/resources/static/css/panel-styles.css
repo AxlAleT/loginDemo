@@ -20,7 +20,6 @@
     --danger-text: #fff;
     --danger-hover-text: #dc3545;
     --secondary-bg: #6c757d;
-    --secondary-text: #fff;
     --secondary-hover-text: #6c757d;
     
     /* Alert colors */
@@ -36,19 +35,18 @@
     --user-welcome-text: #6c757d;
 }
 
-[data-theme="dark"] {
+[data-bs-theme="dark"] {
     /* Dark theme */
     --background-color: #121212;
     --text-color: #ffffff;
     --card-bg: #1e1e1e;
-    --secondary-text: #b0b0b0;
     --border-color: #333333;
     --heading-color: #4da8da;
     --link-color: #64b5f6;
     --button-bg: #64b5f6;
     --button-text: #121212;
     --button-hover-bg: transparent;
-    --button-hover-text: #64b5f6;
+    --button-hover-tsext: #64b5f6;
     --shadow-color: rgba(0, 0, 0, 0.5);
     --table-header-bg: #252525;
     --table-hover-bg: #252525;
@@ -391,15 +389,14 @@ h1, h2, h3, h4, h5, h6,
 }
 
 /* Dark theme */
-[data-theme="dark"] .theme-light-image,
-[data-theme="dark"] .logo-light {
+[data-bs-theme="dark"] .theme-light-image,
+[data-bs-theme="dark"] .logo-light {
     opacity: 0;
 }
 
-[data-theme="dark"] .theme-dark-image,
-[data-theme="dark"] .logo-dark {
+[data-bs-theme="dark"] .theme-dark-image,
+[data-bs-theme="dark"] .logo-dark {
     opacity: 1;
 }
 
 /*# sourceMappingURL=login.css.map */
-

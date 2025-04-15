@@ -1,90 +1,107 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-bs-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Login Template</title>
-  <link href="https://fonts.googleapis.com/css?family=Karla:400,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
-  <link rel="stylesheet" th:href="@{/css/login.css}">
-  <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.ico}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Login Template</title>
+    <link href="https://fonts.googleapis.com/css?family=Karla:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+    <link rel="icon" type="image/x-icon" th:href="@{/images/favicon.ico}">
 </head>
 <body>
 <main class="d-flex align-items-center min-vh-100 py-3 py-md-0">
-  <div class="container">
-    <button id="theme-toggle" class="theme-toggle">
-      <i class="mdi mdi-brightness-6"></i>
-    </button>
-    <div class="card login-card">
-      <div class="row no-gutters">
-        <div class="col-md-5 login-image-container">
-          <img th:src="@{/images/login.jpg}" alt="login" class="login-card-img theme-light-image">
-          <img th:src="@{/images/loginDark.png}" alt="login" class="login-card-img theme-dark-image">
-        </div>
-        <div class="col-md-7">
-          <div class="card-body">
-            <div class="brand-wrapper">
-              <img th:src="@{/images/logo.png}" alt="logo" class="logo logo-light">
-              <img th:src="@{/images/logoDark.png}" alt="logo" class="logo logo-dark">
+    <div class="container">
+        <!-- Color Mode Toggle -->
+        <div class="position-absolute top-0 end-0 p-3">
+            <div class="dropdown">
+                <button class="btn btn-link nav-link py-2 px-0 px-lg-2 dropdown-toggle d-flex align-items-center"
+                        id="bd-theme"
+                        type="button"
+                        aria-expanded="false"
+                        data-bs-toggle="dropdown"
+                        aria-label="Toggle theme (light)">
+                    <i class="mdi mdi-brightness-6 my-1 theme-icon-active"></i>
+                    <span class="ms-2 d-none d-sm-inline" id="bd-theme-text">Toggle theme</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme">
+                    <li>
+                        <button type="button" class="dropdown-item d-flex align-items-center"
+                                data-bs-theme-value="light" aria-pressed="true">
+                            <i class="mdi mdi-weather-sunny me-2 opacity-75"></i>
+                            Light
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark"
+                                aria-pressed="false">
+                            <i class="mdi mdi-weather-night me-2 opacity-75"></i>
+                            Dark
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto"
+                                aria-pressed="false">
+                            <i class="mdi mdi-brightness-auto me-2 opacity-75"></i>
+                            Auto
+                        </button>
+                    </li>
+                </ul>
             </div>
-            <p class="login-card-description">Sign into your account</p>
-
-            <!-- Formulario de login -->
-            <form th:action="@{/login}" method="post">
-              <div class="form-group">
-                <label for="email" class="sr-only">Email</label>
-                <input type="email" name="username" id="email" class="form-control" placeholder="Email address" required>
-              </div>
-              <div class="form-group mb-4">
-                <label for="password" class="sr-only">Password</label>
-                <input type="password" name="password" id="password" class="form-control" placeholder="***********" required>
-              </div>
-              <input name="login" id="login" class="btn btn-block login-btn mb-4" type="submit" value="Login">
-            </form>
-
-            <p class="login-card-footer-text">Don't have an account? <a th:href="@{/register}" class="text-reset">Register here</a></p>
-            <nav class="login-card-footer-nav">
-              <a href="#!">Terms of use.</a>
-              <a href="#!">Privacy policy</a>
-            </nav>
-          </div>
         </div>
-      </div>
+
+        <div class="card login-card shadow">
+            <div class="row no-gutters">
+                <div class="col-md-5 login-image-container">
+                    <img th:src="@{/images/login.jpg}" alt="login" class="login-card-img theme-light-image"
+                         onerror="this.onerror=null; console.error('Failed to load light theme image:', this.src);">
+                    <img th:src="@{/images/loginDark.png}" alt="login" class="login-card-img theme-dark-image"
+                         onerror="this.onerror=null; console.error('Failed to load dark theme image:', this.src);">
+                </div>
+                <div class="col-md-7">
+                    <div class="card-body">
+                        <div class="brand-wrapper">
+                            <img th:src="@{/images/logo.png}" alt="logo" class="logo logo-light"
+                                 onerror="this.onerror=null; console.error('Failed to load light logo:', this.src);">
+                            <img th:src="@{/images/logoDark.png}" alt="logo" class="logo logo-dark"
+                                 onerror="this.onerror=null; console.error('Failed to load dark logo:', this.src);">
+                        </div>
+                        <p class="login-card-description">Sign into your account</p>
+
+                        <!-- Formulario de login -->
+                        <form th:action="@{/login}" method="post">
+                            <div class="form-group mb-3">
+                                <label for="email" class="sr-only">Email</label>
+                                <input type="email" name="username" id="email" class="form-control"
+                                       placeholder="Email address" required>
+                            </div>
+                            <div class="form-group mb-4">
+                                <label for="password" class="sr-only">Password</label>
+                                <input type="password" name="password" id="password" class="form-control"
+                                       placeholder="***********" required>
+                            </div>
+                            <input name="login" id="login" class="btn btn-primary btn-block mb-4" type="submit"
+                                   value="Login">
+                        </form>
+
+                        <p class="login-card-footer-text">Don't have an account? <a th:href="@{/register}"
+                                                                                    class="text-reset">Register here</a>
+                        </p>
+                        <nav class="login-card-footer-nav">
+                            <a href="#!">Terms of use.</a>
+                            <a href="#!">Privacy policy</a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </main>
-
-<script>
-  initThemeManager();
-
-  function initThemeManager() {
-    // Check for saved theme preference or use preferred color scheme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    } else {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-      localStorage.setItem('theme', prefersDark ? 'dark' : 'light');
-    }
-
-    // Add theme toggle button functionality
-    const themeToggle = document.getElementById('theme-toggle');
-    if (themeToggle) {
-      themeToggle.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-      });
-    }
-  }
-</script>
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/js/themeManager.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
 </body>
 </html>

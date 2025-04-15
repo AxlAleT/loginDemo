@@ -1,11 +1,9 @@
-
 ### **1. Core Search & User Management**
 **Actors**: Researchers, Students, Admins
 
 | Use Case | Goal | Design Focus |
 |----------|------|--------------|
 | **Basic Article Search** | Find articles by keywords/title via Semantic Scholar/CrossRef APIs | Preprocess queries with Spring RestTemplate/WebClient, validate inputs with Spring Validation |
-| **Advanced Article Search** | Filter results by publication date, journal, document type, or language | Build dynamic query parameters using DTOs, cache filters with Spring Cache |
 | **Article Metadata Enrichment** | Display detailed metadata (DOI, citations, authors) from API responses | Asynchronous data fetching with WebClient/CompletableFuture |
 | **User Registration & Credential Storage** | Allow users to register with email/password | Spring Security’s `UserDetailsService`, BCrypt password encoding |
 | **Form-Based Authentication** | Authenticate users via username/password | Configure Spring Security’s `formLogin`, CSRF protection, and session management |
@@ -21,7 +19,6 @@
 | **Search History Tracking** | Log user search queries with timestamps | Use `SecurityContextHolder` to inject user context into Spring Data JPA repositories |
 | **Favorites Management** | Save/remove articles to a personal list | Many-to-many relationships in JPA, audit fields (`@CreatedDate`) |
 | **Personalized Search Suggestions** | Suggest keywords based on user history | Store aggregated history data, use Spring `@Scheduled` for periodic analysis |
-| **Export Saved Articles** | Export favorites/history as CSV/JSON | Secure file generation with role checks (`@Secured`) |
 
 ---
 
@@ -45,7 +42,6 @@
 | **Semantic Scholar-Based Recommendations** | Fetch related articles via recommendation API | Circuit breakers (Resilience4j) for fault tolerance |
 | **Trending Research Alerts** | Highlight popular articles in a field | Scheduled API polling with `@Scheduled`, cache results in Redis |
 | **Collaborative Filtering** | Suggest articles based on similar users’ activity | Integrate lightweight ML libraries (e.g., Apache Mahout) with Spring Batch |
-| **Citation Network Visualization** | Show citation relationships between papers | Role-based access (`@PostAuthorize`) for users |
 
 ---
 
@@ -57,18 +53,16 @@
 | **API Response Caching** | Cache frequent API responses (e.g., top searches) | Spring Cache with Caffeine/Redis, evict stale data with `@CacheEvict` |
 | **Concurrent User Sessions** | Support 1k+ authenticated sessions | Spring Session with Redis for distributed session storage |
 | **Load-Tolerant Authentication** | Handle login spikes without downtime | Optimize Spring Security filter chain, disable unnecessary filters |
-| **Health Monitoring** | Track API latency, errors, and uptime | Expose Spring Boot Actuator endpoints secured with `@PreAuthorize` |
 
 ---
 
 ### **6. Accessibility & Integration**
 **Actors**: Users, Developers
 
-| Use Case | Goal | Design Focus |
-|----------|------|--------------|
-| **Responsive UI Rendering** | Adapt UI to mobile/desktop | Serve Thymeleaf templates or integrate with a frontend framework |
-| **Third-Party API Integration** | Allow developers to query articles via REST | Secure endpoints with API keys using Spring Security’s `RequestMatcher` |
-| **Metadata Normalization** | Standardize data from CrossRef/Semantic Scholar | Custom Spring `Converter` implementations for DTO mapping |
+| Use Case | Goal | Design Focus                                                        |
+|----------|------|---------------------------------------------------------------------|
+| **Theme Management** | Support dark/light/auto themes | Store user preferences in CSS variables                             |
+| **Metadata Normalization** | Standardize data from CrossRef/Semantic Scholar | Custom Spring `Converter` implementations for DTO mapping           |
 | **Error Handling** | Return user-friendly API/client errors | Global exception handling with `@ControllerAdvice`, custom HTTP codes |
 
 ---

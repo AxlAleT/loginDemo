@@ -3,34 +3,18 @@ $(document).ready(function () {
     const token = $("meta[name='_csrf']").attr("content");
     const header = $("meta[name='_csrf_header']").attr("content");
     $.ajaxSetup({
-        beforeSend: function(xhr) {
+        beforeSend: function (xhr) {
             xhr.setRequestHeader(header, token);
         }
     });
-    initThemeManager();
 });
 
-function initThemeManager() {
-    // Check for saved theme preference or use preferred color scheme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    } else {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-        localStorage.setItem('theme', prefersDark ? 'dark' : 'light');
-    }
-}
 
 function loadUsers() {
     $.ajax({
-        url: '/api/admin/users',
-        type: 'GET',
-        dataType: 'json',
-        success: function (users) {
+        url: '/api/admin/users', type: 'GET', dataType: 'json', success: function (users) {
             populateUsersTable(users);
-        },
-        error: function () {
+        }, error: function () {
             showAlert('#errorAlert', 'Error loading users.');
         }
     });
@@ -41,20 +25,11 @@ function populateUsersTable(users) {
     tbody.empty(); // Clear the table before filling
 
     $.each(users, function (index, user) {
-        const row = $('<tr>').append(
-            $('<td>').text(user.id),
-            $('<td>').text(user.name),
-            $('<td>').text(user.email),
-            $('<td>').text(user.role),
-            $('<td>').append(
-                $('<button>').addClass('btn btn-sm btn-primary mr-1').text('Edit').on('click', function () {
-                    showEditModal(user.id, user.name, user.email, user.role);
-                }),
-                $('<button>').addClass('btn btn-sm btn-danger').text('Delete').on('click', function () {
-                    deleteUser(user.id);
-                })
-            )
-        );
+        const row = $('<tr>').append($('<td>').text(user.id), $('<td>').text(user.name), $('<td>').text(user.email), $('<td>').text(user.role), $('<td>').append($('<button>').addClass('btn btn-sm btn-primary mr-1').text('Edit').on('click', function () {
+            showEditModal(user.id, user.name, user.email, user.role);
+        }), $('<button>').addClass('btn btn-sm btn-danger').text('Delete').on('click', function () {
+            deleteUser(user.id);
+        })));
         tbody.append(row);
     });
 }
@@ -85,10 +60,7 @@ function showEditModal(id, nombre, email, rol) {
 
 function createUser() {
     const userData = {
-        name: $('#name').val(),
-        email: $('#email').val(),
-        password: $('#password').val(),
-        role: $('#role').val()
+        name: $('#name').val(), email: $('#email').val(), password: $('#password').val(), role: $('#role').val()
     };
 
     $.ajax({
@@ -110,13 +82,11 @@ function createUser() {
 function updateUser() {
     const id = $('#userId').val();
     const userData = {
-        name: $('#name').val(),
-        email: $('#email').val(),
-        role: $('#role').val()
+        name: $('#name').val(), email: $('#email').val(), role: $('#role').val()
     };
 
     // Only include password if entered
-    if ($('#password').val()) {
+    if ($("#password").val()) {
         userData.password = $('#password').val();
     }
 
@@ -139,13 +109,10 @@ function updateUser() {
 function deleteUser(id) {
     if (confirm('Are you sure you want to delete this user?')) {
         $.ajax({
-            url: '/api/admin/users/' + id,
-            type: 'DELETE',
-            success: function () {
+            url: '/api/admin/users/' + id, type: 'DELETE', success: function () {
                 showAlert('#successAlert', 'User deleted successfully.');
                 loadUsers(); // Reload the users table
-            },
-            error: function () {
+            }, error: function () {
                 showAlert('#errorAlert', 'Error deleting user.');
             }
         });

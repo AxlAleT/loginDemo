@@ -3,7 +3,6 @@ package com.escom.papelio.service;
 import com.escom.papelio.dto.ArticleDTO;
 import com.escom.papelio.dto.SearchRequestDTO;
 import com.escom.papelio.dto.SearchResponseDTO;
-import com.escom.papelio.service.ArticleService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,12 +14,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 @Service
@@ -28,38 +25,30 @@ import java.util.function.Supplier;
 @Slf4j
 public class SemanticScholarService implements ArticleService {
 
+    private static final int MAX_RETRIES = 10;
     private final WebClient webClient;
     private final Random random = new Random();
-    private static final int MAX_RETRIES = 10;
-
     @Value("${api.semantic-scholar.base-url:https://api.semanticscholar.org/graph/v1}")
     private String apiBaseUrl;
 
     @Value("${api.semantic-scholar.key:#{null}}")
     private String apiKey;
 
+    private static void getInfo(SemanticScholarResponse response) {
+        log.info("Received {} results out of total {}", response.getData() != null ? response.getData().size() : 0, response.getTotal());
+    }
+
     @Override
     @Cacheable(value = "basicSearchCache", key = "#searchRequest.query + '_' + #searchRequest.page + '_' + #searchRequest.size")
     public SearchResponseDTO searchArticles(SearchRequestDTO searchRequest) {
         log.info("Performing basic search with query: {}", searchRequest.getQuery());
 
-        String uri = UriComponentsBuilder.fromHttpUrl(apiBaseUrl + "/paper/search/bulk")
-                .queryParam("query", searchRequest.getQuery())
-                .queryParam("offset", searchRequest.getPage() * searchRequest.getSize())
-                .queryParam("limit", searchRequest.getSize())
-                .queryParam("fields", "title,abstract,authors,venue,year,citationCount,url,externalIds")
-                .build()
-                .toUriString();
+        String uri = UriComponentsBuilder.fromUriString(apiBaseUrl + "/paper/search/bulk").queryParam("query", searchRequest.getQuery()).queryParam("offset", searchRequest.getPage() * searchRequest.getSize()).queryParam("limit", searchRequest.getSize()).queryParam("fields", "title,abstract,authors,venue,year,citationCount,url,externalIds").build().toUriString();
 
         log.debug("Calling Semantic Scholar API with URL: {}", uri);
 
         try {
-            var response = executeWithRetry(() -> webClient.get()
-                    .uri(uri)
-                    .headers(this::setHeaders)
-                    .retrieve()
-                    .bodyToMono(SemanticScholarResponse.class)
-                    .block());
+            var response = executeWithRetry(() -> webClient.get().uri(uri).headers(this::setHeaders).retrieve().bodyToMono(SemanticScholarResponse.class).block());
 
             if (response == null) {
                 log.warn("Received null response from Semantic Scholar API");
@@ -67,24 +56,14 @@ public class SemanticScholarService implements ArticleService {
             }
 
             log.debug("API Response: {}", response);
-            log.info("Received {} results out of total {}", 
-                response.getData() != null ? response.getData().size() : 0, 
-                response.getTotal());
+            getInfo(response);
 
             List<ArticleDTO> articles = new ArrayList<>();
             if (response.getData() != null) {
-                articles = response.getData().stream()
-                        .map(this::mapToArticleDTO)
-                        .toList();
+                articles = response.getData().stream().map(this::mapToArticleDTO).toList();
             }
 
-            return new SearchResponseDTO(
-                    articles,
-                    response.getTotal() != null ? response.getTotal() : 0,
-                    searchRequest.getPage(),
-                    calculateTotalPages(response.getTotal(), searchRequest.getSize()),
-                    searchRequest.getQuery()
-            );
+            return new SearchResponseDTO(articles, response.getTotal() != null ? response.getTotal() : 0, searchRequest.getPage(), calculateTotalPages(response.getTotal(), searchRequest.getSize()), searchRequest.getQuery());
         } catch (Exception e) {
             log.error("Error searching articles after retries: {}", e.getMessage(), e);
             return createEmptyResponse(searchRequest);
@@ -96,11 +75,7 @@ public class SemanticScholarService implements ArticleService {
     public SearchResponseDTO advancedSearch(SearchRequestDTO searchRequest) {
         log.info("Performing advanced search with filters: {}", searchRequest);
 
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(apiBaseUrl + "/paper/search")
-                .queryParam("query", searchRequest.getQuery())
-                .queryParam("offset", searchRequest.getPage() * searchRequest.getSize())
-                .queryParam("limit", searchRequest.getSize())
-                .queryParam("fields", "title,abstract,authors,venue,year,citationCount,url,externalIds");
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(apiBaseUrl + "/paper/search").queryParam("query", searchRequest.getQuery()).queryParam("offset", searchRequest.getPage() * searchRequest.getSize()).queryParam("limit", searchRequest.getSize()).queryParam("fields", "title,abstract,authors,venue,year,citationCount,url,externalIds");
 
         // Add date range filter if provided
         if (searchRequest.getFromDate() != null) {
@@ -120,12 +95,7 @@ public class SemanticScholarService implements ArticleService {
         log.debug("Calling Semantic Scholar API with URL: {}", uri);
 
         try {
-            var response = executeWithRetry(() -> webClient.get()
-                    .uri(uri)
-                    .headers(this::setHeaders)
-                    .retrieve()
-                    .bodyToMono(SemanticScholarResponse.class)
-                    .block());
+            var response = executeWithRetry(() -> webClient.get().uri(uri).headers(this::setHeaders).retrieve().bodyToMono(SemanticScholarResponse.class).block());
 
             if (response == null) {
                 log.warn("Received null response from Semantic Scholar API");
@@ -133,27 +103,16 @@ public class SemanticScholarService implements ArticleService {
             }
 
             log.debug("API Response: {}", response);
-            log.info("Received {} results out of total {}", 
-                response.getData() != null ? response.getData().size() : 0, 
-                response.getTotal());
+            getInfo(response);
 
             List<ArticleDTO> articles = new ArrayList<>();
             if (response.getData() != null) {
-                articles = response.getData().stream()
-                        .map(this::mapToArticleDTO)
+                articles = response.getData().stream().map(this::mapToArticleDTO)
                         // Apply client-side filtering for more specific filters not supported by API
-                        .filter(article -> filterByDocumentType(article, searchRequest.getDocumentType()))
-                        .filter(article -> filterByLanguage(article, searchRequest.getLanguage()))
-                        .toList();
+                        .filter(article -> filterByDocumentType(article, searchRequest.getDocumentType())).filter(article -> filterByLanguage(article, searchRequest.getLanguage())).toList();
             }
 
-            return new SearchResponseDTO(
-                    articles,
-                    response.getTotal() != null ? response.getTotal() : 0,
-                    searchRequest.getPage(),
-                    calculateTotalPages(response.getTotal(), searchRequest.getSize()),
-                    searchRequest.getQuery()
-            );
+            return new SearchResponseDTO(articles, response.getTotal() != null ? response.getTotal() : 0, searchRequest.getPage(), calculateTotalPages(response.getTotal(), searchRequest.getSize()), searchRequest.getQuery());
         } catch (Exception e) {
             log.error("Error performing advanced search after retries: {}", e.getMessage(), e);
             return createEmptyResponse(searchRequest);
@@ -165,20 +124,11 @@ public class SemanticScholarService implements ArticleService {
     public Optional<ArticleDTO> getArticleById(String id) {
         log.info("Fetching article details for ID: {}", id);
 
-        String uri = UriComponentsBuilder.fromHttpUrl(apiBaseUrl + "/paper/" + id)
-                .queryParam("fields", "title,abstract,authors,venue,year,citationCount,url,externalIds,references")
-                .build()
-                .toUriString();
-
+        String uri = UriComponentsBuilder.fromUriString(apiBaseUrl + "/paper/" + id).queryParam("fields", "title,abstract,authors,venue,year,citationCount,url,externalIds,references").build().toUriString();
         log.debug("Calling Semantic Scholar API with URL: {}", uri);
 
         try {
-            var response = executeWithRetry(() -> webClient.get()
-                    .uri(uri)
-                    .headers(this::setHeaders)
-                    .retrieve()
-                    .bodyToMono(SemanticScholarPaper.class)
-                    .block());
+            var response = executeWithRetry(() -> webClient.get().uri(uri).headers(this::setHeaders).retrieve().bodyToMono(SemanticScholarPaper.class).block());
 
             if (response == null) {
                 log.warn("Received null response from Semantic Scholar API for ID: {}", id);
@@ -192,19 +142,20 @@ public class SemanticScholarService implements ArticleService {
             return Optional.empty();
         }
     }
-    
+
     /**
      * Executes a function with retry logic for handling 429 Too Many Requests errors
      * Will retry up to MAX_RETRIES times with a random delay between 0-1 second
+     *
      * @param supplier The function to execute that might throw a 429 exception
+     * @param <T>      The return type of the function
      * @return The result of the function execution
-     * @param <T> The return type of the function
      * @throws Exception If the function still fails after all retries
      */
     private <T> T executeWithRetry(Supplier<T> supplier) throws Exception {
         int attempts = 0;
         Exception lastException = null;
-        
+
         while (attempts < MAX_RETRIES) {
             try {
                 return supplier.get();
@@ -212,12 +163,11 @@ public class SemanticScholarService implements ArticleService {
                 if (e.getStatusCode().value() == 429) {
                     attempts++;
                     lastException = e;
-                    
+
                     // Calculate random delay between 0-1000ms
                     long delayMillis = random.nextInt(1000);
-                    log.warn("Received 429 Too Many Requests, retry attempt {}/{} after {}ms delay", 
-                            attempts, MAX_RETRIES, delayMillis);
-                    
+                    log.warn("Received 429 Too Many Requests, retry attempt {}/{} after {}ms delay", attempts, MAX_RETRIES, delayMillis);
+
                     try {
                         Thread.sleep(delayMillis);
                     } catch (InterruptedException ie) {
@@ -227,16 +177,12 @@ public class SemanticScholarService implements ArticleService {
                 } else {
                     throw e;
                 }
-            } catch (Exception e) {
-                throw e;
             }
         }
-        
+
         log.error("Failed after {} retry attempts", MAX_RETRIES);
-        if (lastException != null) {
-            throw lastException;
-        }
-        throw new RuntimeException("Failed after maximum retries");
+        throw lastException;
+
     }
 
     private void setHeaders(HttpHeaders headers) {
@@ -247,7 +193,7 @@ public class SemanticScholarService implements ArticleService {
 
     private ArticleDTO mapToArticleDTO(SemanticScholarPaper paper) {
         log.debug("Mapping paper to ArticleDTO: {}", paper.getPaperId());
-        
+
         ArticleDTO dto = new ArticleDTO();
         dto.setId(paper.getPaperId());
         dto.setTitle(paper.getTitle());
@@ -260,9 +206,7 @@ public class SemanticScholarService implements ArticleService {
 
         // Extract authors
         if (paper.getAuthors() != null) {
-            dto.setAuthors(paper.getAuthors().stream()
-                    .map(author -> author.getName())
-                    .toList());
+            dto.setAuthors(paper.getAuthors().stream().map(Author::getName).toList());
         } else {
             dto.setAuthors(new ArrayList<>());
         }
@@ -305,13 +249,7 @@ public class SemanticScholarService implements ArticleService {
     }
 
     private SearchResponseDTO createEmptyResponse(SearchRequestDTO request) {
-        return new SearchResponseDTO(
-                new ArrayList<>(),
-                0,
-                request.getPage(),
-                0,
-                request.getQuery()
-        );
+        return new SearchResponseDTO(new ArrayList<>(), 0, request.getPage(), 0, request.getQuery());
     }
 
     // Inner classes for API responses

@@ -28,7 +28,7 @@
     --pagination-disabled-color: #6c757d;
 }
 
-[data-theme="dark"] {
+[data-bs-theme="dark"] {
     /* Dark theme */
     --background-color: #121212;
     --text-color: #ffffff;
