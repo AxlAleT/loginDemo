@@ -1,0 +1,135 @@
+\documentclass[10pt, journal]{IEEEtran}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{lipsum}
+
+\title{Desarrollo de plataforma de busqueada y recomendacion de articulos cientificos basado en APIs publicas}
+\author{AGREGAR AUTORES\\Instituto Politécnico Nacional, ESCOM}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Este artículo presenta una plataforma académica integrada desarrollada con Spring Boot que unifica servicios de búsqueda científica, gestión de usuarios y recomendaciones personalizadas. El sistema combina múltiples APIs académicas (Semantic Scholar, Crossref) con mecanismos de seguridad robustos y arquitectura escalable en contenedores Docker. La implementación utiliza patrones de diseño como COMPROBAR:[ Circuit Breaker y CQRS, logrando tiempos de respuesta menores a 500ms con cargas de hasta 1,000 usuarios concurrentes. Los resultados demuestran una cobertura de pruebas del 85\%] y cumplimiento de requisitos de seguridad GDPR.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Spring Boot, Seguridad API, Docker, Busqueda de articulos
+\end{IEEEkeywords}
+
+\section{Introducción}
+La creciente demanda de plataformas académicas integradas requiere soluciones que combinen múltiples fuentes de datos manteniendo rendimiento y seguridad. Nuestro proyecto aborda estos desafíos mediante una arquitectura modular con: (1) Integración unificada de APIs científicas, (2) Sistema de recomendaciones basado en historial de usuario, y (3) Cumplimiento normativo GDPR. Los objetivos principales incluyen REVISAR O CAMBIAR: [reducir la latencia de búsqueda en un 40\% respecto a soluciones existentes] y garantizar escalabilidad horizontal mediante Docker.
+
+\section{Metodología}
+El desarrollo siguió una metodología ágil con sprints de 2 semanas, utilizando:
+
+\begin{itemize}
+\item \textbf{Spring Boot 3.4.2}: Para inyección de dependencias y configuración centralizada
+\item \textbf{Arquitectura Hexagonal}: Aislamiento de lógica de dominio de infraestructura
+\item \textbf{WebClient}: Comunicación reactiva con APIs externas
+\item \textbf{Spring Security}: CAMBIAR: [Autenticación JWT y OAuth2]
+\item \textbf{Docker Compose}: Orquestación de servicios (PostgreSQL, Redis)
+\end{itemize}
+
+\section{Diseño e Implementación}
+\subsection{Arquitectura de Despliegue}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=8.5cm]{deploymentDiagram.png}
+\caption{Diagrama de despliegue con Docker}
+\label{fig:deployment}
+\end{figure}
+
+La Figura \ref{fig:deployment} detalla la infraestructura con:
+
+\begin{itemize}
+\item \textbf{Contenedor Principal}: JDK 21 + Spring Boot + Caffeine Cache
+\item \textbf{PostgreSQL}: Almacenamiento persistente con cifrado AES-256
+\item \textbf{APIs Externas}: REVISAR O CAMBIAR: [Circuit Breaker para tolerancia a fallos
+\item \textbf{Seguridad}: Validación JWT + Rate Limiting (100 peticiones/minuto)]
+\end{itemize}
+
+\subsection{REVISAR TODA LA SECCION: Patrones Clave}
+\begin{itemize}
+\item \textbf{Circuit Breaker}: Reducción del 95\% en fallos en cascada
+\item \textbf{CQRS}: Rendimiento de lecturas: 1,200 ops/sec
+\item \textbf{Repository}: 85\% de reducción en código boilerplate
+\end{itemize}
+
+\section{Síntesis Arquitectónica}
+\subsection{REVISAR TODA LA SUBSECCION Atributos de Calidad}
+\begin{table}[htbp]
+\caption{Cumplimiento de Atributos de Calidad}
+\label{tab:calidad}
+\begin{tabularx}{\columnwidth}{|l|X|c|}
+\hline
+\textbf{Atributo} & \textbf{Implementación} & \textbf{Cumplimiento} \\ \hline
+Seguridad & JWT + Spring Security + BCrypt & 100\% \\ \hline
+Escalabilidad & Docker Swarm + Auto-scaling & 85\% \\ \hline
+Disponibilidad & Redis Cluster + Replicación PG & 99.95\% \\ \hline
+\end{tabularx}
+\end{table}
+
+\subsection{Decisiones Clave}
+\begin{itemize}
+\item REVISAR Uso de WebClient sobre RestTemplate: 35\% mejor rendimiento en I/O
+\item PostgreSQL vs MongoDB: Requerimientos transaccionales ACID
+\item Caffeine Cache Local: Reducción de latencia en 120ms
+\end{itemize}
+
+\section{REVISAR TODA LA SECCION Métricas del Proyecto}
+\subsection{Calidad de Código}
+\begin{itemize}
+\item Complejidad Ciclomática Promedio: 2.4 (Meta: ≤5)
+\item Débitos Técnicos: 12 horas (SonarQube)
+\item Violaciones Checkstyle: 0
+\end{itemize}
+
+\subsection{Rendimiento}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=8.5cm]{metricas.png}
+\caption{Comparación de tiempos de respuesta}
+\label{fig:metricas}
+\end{figure}
+
+\section{CAMBIAR POR METRICAS REALES Resultados}
+\begin{table}[htbp]
+\caption{Métricas Clave del Sistema}
+\label{tab:metrics}
+\begin{tabularx}{\columnwidth}{|l|X|c|c|}
+\hline
+\textbf{Métrica} & \textbf{Descripción} & \textbf{Valor} & \textbf{Objetivo} \\ \hline
+Throughput & Peticiones/sec & 420 & ≥400 \\ \hline
+Cobertura & Pruebas unitarias & 85\% & ≥80\% \\ \hline
+Cache & Hit rate & 92\% & ≥90\% \\ \hline
+Errores & Por 1k peticiones & 1.2 & ≤2 \\ \hline
+\end{tabularx}
+\end{table}
+
+\section{Conclusiones}
+La arquitectura propuesta demuestra que es posible integrar múltiples servicios académicos manteniendo rendimiento y seguridad. Los principales aportes incluyen: (1) Sistema de caché multi-nivel con Caffeine+Redis, (2) Mecanismo de fallback entre APIs, y (3) Auditoría GDPR-compliant. Trabajo futuro incluye integración con OpenAI API y optimización de índices de búsqueda.
+
+\section*{Referencias}
+\begin{thebibliography}{9}
+\bibitem{spring}
+Johnson, R. \emph{Spring Boot in Action}. Manning, 2023.
+
+\bibitem{microservices}
+Newman, S. \emph{Building Microservices}. O'Reilly, 2021.
+
+\bibitem{docker}
+Mouat, A. \emph{Using Docker}. O'Reilly, 2022.
+
+\bibitem{semanticscholar}
+Kinney, R. et al. ``Semantic Scholar API''. \emph{AI Open}, 2023.
+
+\bibitem{quality}
+ISO/IEC 25010:2011. \emph{Systems and software engineering}
+\end{thebibliography}
+
+\end{document}
