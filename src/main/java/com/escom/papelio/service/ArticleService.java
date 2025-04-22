@@ -9,7 +9,6 @@ import java.util.Optional;
 
 public interface ArticleService {
     SearchResponseDTO searchArticles(SearchRequestDTO searchRequest);
-    SearchResponseDTO advancedSearch(SearchRequestDTO searchRequest);
     Optional<ArticleDTO> getArticleById(String id);
     SearchResponseDTO getRecommendations(RecommendationRequestDTO request);
 }

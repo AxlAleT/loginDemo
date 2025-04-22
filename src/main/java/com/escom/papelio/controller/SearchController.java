@@ -48,23 +48,6 @@ public class SearchController {
         return "search/results";
     }
 
-    @PostMapping("/advanced/results")
-    public String performAdvancedSearch(@ModelAttribute SearchRequestDTO searchRequest,
-                                        Model model,
-                                        Authentication authentication) {
-
-        SearchResponseDTO results = articleService.advancedSearch(searchRequest);
-        model.addAttribute("results", results);
-
-        // Log search history if user is authenticated
-        if (authentication != null) {
-            searchHistoryService.saveSearchQuery(authentication.getName(),
-                    "Advanced: " + searchRequest.getQuery());
-        }
-
-        return "search/results";
-    }
-
     @GetMapping("/history")
     public String viewSearchHistory(Model model, Principal principal) {
         if (principal != null) {

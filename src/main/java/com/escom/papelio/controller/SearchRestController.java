@@ -46,25 +46,6 @@ public class SearchRestController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/advanced")
-    public ResponseEntity<SearchResponseDTO> advancedSearch(
-            @Valid @RequestBody SearchRequestDTO searchRequest,
-            Authentication authentication) {
-
-        log.info("Received advanced search request with filters");
-
-        // Perform advanced search
-        SearchResponseDTO response = articleService.advancedSearch(searchRequest);
-
-        // Log search history if user is authenticated
-        if (authentication != null) {
-            searchHistoryService.saveSearchQuery(authentication.getName(),
-                    "Advanced: " + searchRequest.getQuery());
-        }
-
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping("/article/{id}")
     public ResponseEntity<ArticleDTO> getArticleById(@PathVariable String id, Authentication authentication) {
         log.info("Fetching article with id: {}", id);

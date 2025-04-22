@@ -26,6 +26,8 @@ public class SemanticScholarService implements ArticleService {
     private final SemanticScholarMapper mapper;
     
     private static final int TARGET_RECOMMENDATIONS = 20;
+    private static final int TARGET_RETRIVED_ARTICLES = 100;
+
     private static final String TARGET_FIELDS = "title,abstract,authors,venue,year,citationCount,url,externalIds";
 
     private static void getInfo(SemanticScholarResponse response) {
@@ -43,7 +45,7 @@ public class SemanticScholarService implements ArticleService {
             var response = apiClient.searchPapers(
                     searchRequest.getQuery(),
                     searchRequest.getPage() * searchRequest.getSize(),
-                    searchRequest.getSize(),
+                    TARGET_RETRIVED_ARTICLES,
                     TARGET_FIELDS
             );
 
@@ -71,65 +73,6 @@ public class SemanticScholarService implements ArticleService {
             );
         } catch (Exception e) {
             log.error("Error searching articles: {}", e.getMessage(), e);
-            return createEmptyResponse(searchRequest);
-        }
-    }
-
-    @Override
-    @Cacheable(value = "advancedSearchCache", key = "#searchRequest.toString()")
-    public SearchResponseDTO advancedSearch(SearchRequestDTO searchRequest) {
-        log.info("Performing advanced search with filters: {}", searchRequest);
-
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString("/paper/search")
-                .queryParam("query", searchRequest.getQuery())
-                .queryParam("offset", searchRequest.getPage() * searchRequest.getSize())
-                .queryParam("limit", searchRequest.getSize())
-                .queryParam("fields", TARGET_FIELDS);
-
-        // Add date range filter if provided
-        if (searchRequest.getFromDate() != null) {
-            uriBuilder.queryParam("year", ">=" + searchRequest.getFromDate().getYear());
-        }
-
-        if (searchRequest.getToDate() != null) {
-            uriBuilder.queryParam("year", "<=" + searchRequest.getToDate().getYear());
-        }
-
-        // Add journal filter if provided
-        if (searchRequest.getJournal() != null && !searchRequest.getJournal().isEmpty()) {
-            uriBuilder.queryParam("venue", searchRequest.getJournal());
-        }
-
-        try {
-            var response = apiClient.advancedSearch(uriBuilder);
-
-            if (response == null) {
-                log.warn("Received null response from Semantic Scholar API");
-                return createEmptyResponse(searchRequest);
-            }
-
-            log.debug("API Response: {}", response);
-            getInfo(response);
-
-            List<ArticleDTO> articles = new ArrayList<>();
-            if (response.getData() != null) {
-                articles = response.getData().stream()
-                        .map(mapper::mapToArticleDTO)
-                        // Apply client-side filtering for more specific filters not supported by API
-                        .filter(article -> mapper.filterByDocumentType(article, searchRequest.getDocumentType()))
-                        .filter(article -> mapper.filterByLanguage(article, searchRequest.getLanguage()))
-                        .collect(Collectors.toList());
-            }
-
-            return new SearchResponseDTO(
-                    articles,
-                    response.getTotal() != null ? response.getTotal() : 0,
-                    searchRequest.getPage(),
-                    calculateTotalPages(response.getTotal(), searchRequest.getSize()),
-                    searchRequest.getQuery()
-            );
-        } catch (Exception e) {
-            log.error("Error performing advanced search: {}", e.getMessage(), e);
             return createEmptyResponse(searchRequest);
         }
     }

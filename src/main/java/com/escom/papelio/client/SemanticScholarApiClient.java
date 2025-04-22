@@ -21,24 +21,24 @@ import java.util.HashMap;
 public class SemanticScholarApiClient {
     private final WebClient webClient;
     private final ApiRetryUtil apiRetryUtil;
-    
+
     @Value("${api.semantic-scholar.base-url:https://api.semanticscholar.org/graph/v1}")
     private String apiBaseUrl;
 
     @Value("${api.semantic-scholar.key:#{null}}")
     private String apiKey;
-    
+
     public SemanticScholarResponse searchPapers(String query, int offset, int limit, String fields) {
-        String uri = UriComponentsBuilder.fromUriString(apiBaseUrl + "/paper/search/bulk")
+        String uri = UriComponentsBuilder.fromUriString(apiBaseUrl + "/paper/search")
                 .queryParam("query", query)
                 .queryParam("offset", offset)
                 .queryParam("limit", limit)
                 .queryParam("fields", fields)
                 .build().toUriString();
-                
+
         log.debug("Calling Semantic Scholar API with URL: {}", uri);
-        
-        return apiRetryUtil.executeWithRetry(() -> 
+
+        return apiRetryUtil.executeWithRetry(() ->
             webClient.get()
                 .uri(uri)
                 .headers(this::setHeaders)
@@ -47,29 +47,15 @@ public class SemanticScholarApiClient {
                 .block()
         );
     }
-    
-    public SemanticScholarResponse advancedSearch(UriComponentsBuilder uriBuilder) {
-        String uri = uriBuilder.build().toUriString();
-        log.debug("Calling Semantic Scholar API with URL: {}", uri);
-        
-        return apiRetryUtil.executeWithRetry(() -> 
-            webClient.get()
-                .uri(uri)
-                .headers(this::setHeaders)
-                .retrieve()
-                .bodyToMono(SemanticScholarResponse.class)
-                .block()
-        );
-    }
-    
+
     public SemanticScholarPaper getPaperById(String id, String fields) {
         String uri = UriComponentsBuilder.fromUriString(apiBaseUrl + "/paper/" + id)
                 .queryParam("fields", fields)
                 .build().toUriString();
-                
+
         log.debug("Calling Semantic Scholar API with URL: {}", uri);
-        
-        return apiRetryUtil.executeWithRetry(() -> 
+
+        return apiRetryUtil.executeWithRetry(() ->
             webClient.get()
                 .uri(uri)
                 .headers(this::setHeaders)
@@ -78,7 +64,7 @@ public class SemanticScholarApiClient {
                 .block()
         );
     }
-    
+
     public SemanticScholarRecommendedPapers getRecommendations(List<String> paperIds, int limit, String fields) {
         String uri = UriComponentsBuilder.fromUriString("https://api.semanticscholar.org/recommendations/v1/papers")
                 .queryParam("limit", limit)
