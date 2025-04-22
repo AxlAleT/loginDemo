@@ -11,10 +11,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,18 +22,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SemanticScholarService implements ArticleService {
 
+    private static final int TARGET_RECOMMENDATIONS = 10;
+    private static final int TARGET_RETRIVED_ARTICLES = 100;
+    private static final String TARGET_FIELDS = "title,abstract,authors,venue,year,citationCount,url,externalIds";
     private final SemanticScholarApiClient apiClient;
     private final SemanticScholarMapper mapper;
-    
-    private static final int TARGET_RECOMMENDATIONS = 20;
-    private static final int TARGET_RETRIVED_ARTICLES = 100;
-
-    private static final String TARGET_FIELDS = "title,abstract,authors,venue,year,citationCount,url,externalIds";
 
     private static void getInfo(SemanticScholarResponse response) {
-        log.info("Received {} results out of total {}", 
-                response.getData() != null ? response.getData().size() : 0, 
-                response.getTotal());
+        log.info("Received {} results out of total {}", response.getData() != null ? response.getData().size() : 0, response.getTotal());
     }
 
     @Override
@@ -42,12 +38,7 @@ public class SemanticScholarService implements ArticleService {
         log.info("Performing basic search with query: {}", searchRequest.getQuery());
 
         try {
-            var response = apiClient.searchPapers(
-                    searchRequest.getQuery(),
-                    searchRequest.getPage() * searchRequest.getSize(),
-                    TARGET_RETRIVED_ARTICLES,
-                    TARGET_FIELDS
-            );
+            var response = apiClient.searchPapers(searchRequest.getQuery(), searchRequest.getPage() * searchRequest.getSize(), TARGET_RETRIVED_ARTICLES, TARGET_FIELDS);
 
             if (response == null) {
                 log.warn("Received null response from Semantic Scholar API");
@@ -59,18 +50,10 @@ public class SemanticScholarService implements ArticleService {
 
             List<ArticleDTO> articles = new ArrayList<>();
             if (response.getData() != null) {
-                articles = response.getData().stream()
-                        .map(mapper::mapToArticleDTO)
-                        .collect(Collectors.toList());
+                articles = response.getData().stream().map(mapper::mapToArticleDTO).collect(Collectors.toList());
             }
 
-            return new SearchResponseDTO(
-                    articles,
-                    response.getTotal() != null ? response.getTotal() : 0,
-                    searchRequest.getPage(),
-                    calculateTotalPages(response.getTotal(), searchRequest.getSize()),
-                    searchRequest.getQuery()
-            );
+            return new SearchResponseDTO(articles, response.getTotal() != null ? response.getTotal() : 0, searchRequest.getPage(), calculateTotalPages(response.getTotal(), searchRequest.getSize()), searchRequest.getQuery());
         } catch (Exception e) {
             log.error("Error searching articles: {}", e.getMessage(), e);
             return createEmptyResponse(searchRequest);
@@ -101,19 +84,15 @@ public class SemanticScholarService implements ArticleService {
     @Cacheable(value = "recommendationsCache", key = "#request.paperIds.toString()")
     public SearchResponseDTO getRecommendations(RecommendationRequestDTO request) {
         log.info("Getting recommendations for {} paper(s)", request.getPaperIds().size());
-        
+
         if (request.getPaperIds() == null || request.getPaperIds().isEmpty()) {
             log.warn("Empty paper IDs list provided for recommendations");
             return new SearchResponseDTO(new ArrayList<>(), 0, 0, 0, "recommendations");
         }
-        
+
         try {
             // Use the new POST endpoint for recommendations
-            var response = apiClient.getRecommendations(
-                    request.getPaperIds(),
-                    TARGET_RECOMMENDATIONS,
-                    TARGET_FIELDS
-            );
+            var response = apiClient.getRecommendations(request.getPaperIds(), TARGET_RECOMMENDATIONS, TARGET_FIELDS);
 
             log.debug("API Response for recommendations: {}", response.toString());
 
@@ -121,32 +100,24 @@ public class SemanticScholarService implements ArticleService {
                 log.warn("No recommendations found for the provided paper IDs");
                 return new SearchResponseDTO(new ArrayList<>(), 0, 0, 0, "recommendations");
             }
-            
+
             // Map the recommendations to DTOs
-            List<ArticleDTO> recommendations = response.getRecommendedPapers().stream()
-                    .map(mapper::mapToArticleDTO)
-                    .collect(Collectors.toList());
-            
+            List<ArticleDTO> recommendations = response.getRecommendedPapers().stream().map(mapper::mapToArticleDTO).collect(Collectors.toList());
+
             // Limit to target count if necessary
             if (recommendations.size() > TARGET_RECOMMENDATIONS) {
                 recommendations = recommendations.subList(0, TARGET_RECOMMENDATIONS);
             }
-            
+
             log.info("Returning {} recommendations", recommendations.size());
-            
-            return new SearchResponseDTO(
-                    recommendations,
-                    recommendations.size(),
-                    0,
-                    1,
-                    "recommendations"
-            );
+
+            return new SearchResponseDTO(recommendations, recommendations.size(), 0, 1, "recommendations");
         } catch (Exception e) {
             log.error("Error fetching recommendations: {}", e.getMessage(), e);
             return new SearchResponseDTO(new ArrayList<>(), 0, 0, 0, "recommendations");
         }
     }
-    
+
     private int calculateLimitPerPaper(int paperCount) {
         // Adjust the limit per paper based on the count
         if (paperCount <= 3) {

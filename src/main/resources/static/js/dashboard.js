@@ -42,7 +42,7 @@ function fetchPopularArticles() {
             return response.json();
         })
         .then(data => {
-            displayArticles(data, popularContainer, 'No popular articles available yet.');
+            displayArticles(data.articles, popularContainer, 'No popular articles available yet.');
         })
         .catch(error => {
             console.error('Error fetching popular articles:', error);
@@ -99,3 +99,4 @@ function truncateText(text, maxLength) {
     if (text.length <= maxLength) return text;
     return text.substr(0, maxLength) + '...';
 }
+

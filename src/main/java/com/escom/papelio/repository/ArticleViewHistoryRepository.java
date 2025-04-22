@@ -11,7 +11,7 @@ import java.util.List;
 public interface ArticleViewHistoryRepository extends JpaRepository<ArticleViewHistory, Long> {
     List<ArticleViewHistory> findByUserEmailOrderByViewDateDesc(String userEmail);
 
-    @Query("SELECT avh.articleId, COUNT(avh) as count FROM ArticleViewHistory avh " +
-            "GROUP BY avh.articleId ORDER BY count DESC LIMIT 10")
+    @Query("SELECT avh.title, avh.articleId, COUNT(avh) as count FROM ArticleViewHistory avh " +
+            "GROUP BY avh.title, avh.articleId ORDER BY count DESC LIMIT 10")
     List<Object[]> findMostViewedArticles();
 }

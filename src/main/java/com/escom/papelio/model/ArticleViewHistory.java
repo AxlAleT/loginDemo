@@ -21,6 +21,9 @@ public class ArticleViewHistory {
     private Long id;
 
     @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
     private String userEmail;
 
     @Column(nullable = false)

@@ -59,7 +59,7 @@ class SearchStateMachine {
                     $('#searchResultsContainer').hide();
                 }
             }, viewingArticle: {
-                enter: (articleId) => this.handleViewingArticleState(articleId),
+                enter: (articleId, title) => this.handleViewingArticleState(articleId, title),
                 exit: () => $('#articleModal').modal('hide')
             }, viewingHistory: {
                 enter: (historyType) => this.handleViewingHistoryState(historyType), exit: () => {
@@ -135,10 +135,11 @@ class SearchStateMachine {
             }
         });
 
-        // View article details
+        // View article details: ensure both articleId and title are passed
         $(document).on('click', '.view-details', (e) => {
             const articleId = $(e.currentTarget).data('id');
-            this.transition('viewingArticle', articleId);
+            const title = $(e.currentTarget).data('title'); // new: retrieve title
+            this.transition('viewingArticle', articleId, title);
         });
 
         // Repeat search from history
@@ -267,11 +268,13 @@ class SearchStateMachine {
     }
 
     // Viewing article state handler
-    handleViewingArticleState(articleId) {
+    handleViewingArticleState(articleId, title) {
         $('#loader').show();
 
         $.ajax({
-            url: `/api/search/article/${articleId}`, method: 'GET', success: (article) => {
+            url: `/api/search/article/${articleId}?title=${encodeURIComponent(title)}`, // changed line
+            method: 'GET',
+            success: (article) => {
                 // Build HTML for article details
                 let detailsHtml = `
                     <h4>${article.title}</h4>
@@ -422,7 +425,7 @@ class SearchStateMachine {
                     <table class="panel-table">
                         <thead>
                             <tr>
-                                <th>Article</th>
+                                <th>Title</th>
                                 <th>Viewed On</th>
                                 <th>Actions</th>
                             </tr>
@@ -433,14 +436,13 @@ class SearchStateMachine {
                 history.forEach(item => {
                     const date = new Date(item.viewDate).toLocaleString();
                     const articleId = item.articleId;
-                    const articleTitle = item.articleTitle || articleId;
-
+                    const articleTitle = item.title;
                     historyHtml += `
                         <tr>
                             <td>${articleTitle}</td>
                             <td>${date}</td>
                             <td>
-                                <button class="btn panel-action-btn panel-action-primary view-details" data-id="${articleId}">
+                                <button class="btn panel-action-btn panel-action-primary view-details" data-id="${articleId}" data-title="${articleTitle}">
                                     View Again
                                 </button>
                             </td>
@@ -517,7 +519,9 @@ class SearchStateMachine {
                                 <span class="badge badge-citations">${article.citationCount || 0} citations</span>
                             </div>
                             <p class="article-abstract">${article.abstract || 'No abstract available for this article.'}</p>
-                            <button class="btn panel-btn btn-sm view-details" data-id="${article.id}">View Details</button>
+                            <button class="btn panel-btn btn-sm view-details" data-id="${article.id}" data-title="${article.title}">
+                                View Details
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -594,3 +598,4 @@ class SearchStateMachine {
         $('#resultsPagination').html(paginationHtml);
     }
 }
+

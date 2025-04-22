@@ -47,12 +47,13 @@ public class SearchRestController {
     }
 
     @GetMapping("/article/{id}")
-    public ResponseEntity<ArticleDTO> getArticleById(@PathVariable String id, Authentication authentication) {
-        log.info("Fetching article with id: {}", id);
-
+    public ResponseEntity<ArticleDTO> getArticleById(
+            @PathVariable String id,
+            @RequestParam String title,
+            Authentication authentication) {
         // Track article view if user is authenticated
         if (authentication != null) {
-            articleViewHistoryService.saveArticleView(authentication.getName(), id);
+            articleViewHistoryService.saveArticleView(authentication.getName(), id, title);
         }
 
         return articleService.getArticleById(id)
@@ -77,8 +78,8 @@ public class SearchRestController {
     }
 
     @GetMapping("/popular-articles")
-    public ResponseEntity<?> getPopularArticles() {
-        return ResponseEntity.ok(articleViewHistoryService.getMostViewedArticles());
+    public ResponseEntity<SearchResponseDTO> getPopularArticles() {
+        return ResponseEntity.ok(articleViewHistoryService.getMostViewedArticlesAsDTO());
     }
 
     @GetMapping("/recommendations")
