@@ -18,7 +18,8 @@ public class CacheConfig {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
                 "basicSearchCache",
                 "advancedSearchCache",
-                "articleDetails"
+                "articleDetails",
+                "recommendationsCache"
         );
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .expireAfterWrite(30, TimeUnit.MINUTES)

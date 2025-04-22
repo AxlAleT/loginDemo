@@ -3,6 +3,8 @@ package com.escom.papelio.mapper;
 import com.escom.papelio.dto.ArticleDTO;
 import com.escom.papelio.model.Author;
 import com.escom.papelio.model.SemanticScholarPaper;
+import com.escom.papelio.model.SemanticScholarResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -63,5 +65,17 @@ public class SemanticScholarMapper {
         }
         // Simple implementation - in real world would need proper logic
         return language.equalsIgnoreCase(article.getLanguage());
+    }
+    
+    // New method to map raw API responses to SemanticScholarResponse
+    public SemanticScholarResponse toSemanticScholarResponse(String rawResponse) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(rawResponse, SemanticScholarResponse.class);
+        } catch(Exception ex) {
+            log.error("Custom mapping failed for raw response: {}", rawResponse, ex);
+            // Returning an empty response or handle as needed
+            return new SemanticScholarResponse();
+        }
     }
 }

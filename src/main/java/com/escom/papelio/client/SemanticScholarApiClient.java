@@ -1,6 +1,7 @@
 package com.escom.papelio.client;
 
 import com.escom.papelio.model.SemanticScholarPaper;
+import com.escom.papelio.model.SemanticScholarRecommendedPapers;
 import com.escom.papelio.model.SemanticScholarResponse;
 import com.escom.papelio.util.ApiRetryUtil;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -75,20 +79,25 @@ public class SemanticScholarApiClient {
         );
     }
     
-    public SemanticScholarResponse getRecommendationsForPaper(String paperId, int limit, String fields) {
-        String uri = UriComponentsBuilder.fromUriString(apiBaseUrl + "/paper/" + paperId + "/recommendations")
+    public SemanticScholarRecommendedPapers getRecommendations(List<String> paperIds, int limit, String fields) {
+        String uri = UriComponentsBuilder.fromUriString("https://api.semanticscholar.org/recommendations/v1/papers")
                 .queryParam("limit", limit)
                 .queryParam("fields", fields)
                 .build().toUriString();
 
         log.debug("Calling Semantic Scholar API for recommendations with URL: {}", uri);
 
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("positivePaperIds", paperIds);
+        log.debug("Payload for recommendations: {}", payload);
+
         return apiRetryUtil.executeWithRetry(() ->
-            webClient.get()
+            webClient.post()
                 .uri(uri)
                 .headers(this::setHeaders)
+                .bodyValue(payload)
                 .retrieve()
-                .bodyToMono(SemanticScholarResponse.class)
+                .bodyToMono(SemanticScholarRecommendedPapers.class)
                 .block()
         );
     }
@@ -98,4 +107,4 @@ public class SemanticScholarApiClient {
             headers.set("x-api-key", apiKey);
         }
     }
-};
+}

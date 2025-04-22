@@ -26,7 +26,7 @@ public class SemanticScholarService implements ArticleService {
     private final SemanticScholarMapper mapper;
     
     private static final int TARGET_RECOMMENDATIONS = 20;
-    private static final String RECOMMENDATION_FIELDS = "title,abstract,authors,venue,year,citationCount,url,externalIds";
+    private static final String TARGET_FIELDS = "title,abstract,authors,venue,year,citationCount,url,externalIds";
 
     private static void getInfo(SemanticScholarResponse response) {
         log.info("Received {} results out of total {}", 
@@ -44,7 +44,7 @@ public class SemanticScholarService implements ArticleService {
                     searchRequest.getQuery(),
                     searchRequest.getPage() * searchRequest.getSize(),
                     searchRequest.getSize(),
-                    "title,abstract,authors,venue,year,citationCount,url,externalIds"
+                    TARGET_FIELDS
             );
 
             if (response == null) {
@@ -84,7 +84,7 @@ public class SemanticScholarService implements ArticleService {
                 .queryParam("query", searchRequest.getQuery())
                 .queryParam("offset", searchRequest.getPage() * searchRequest.getSize())
                 .queryParam("limit", searchRequest.getSize())
-                .queryParam("fields", "title,abstract,authors,venue,year,citationCount,url,externalIds");
+                .queryParam("fields", TARGET_FIELDS);
 
         // Add date range filter if provided
         if (searchRequest.getFromDate() != null) {
@@ -164,58 +164,44 @@ public class SemanticScholarService implements ArticleService {
             return new SearchResponseDTO(new ArrayList<>(), 0, 0, 0, "recommendations");
         }
         
-        // Calculate how many recommendations to request per paper
-        int paperCount = request.getPaperIds().size();
-        int limitPerPaper = calculateLimitPerPaper(paperCount);
-        
-        log.info("Requesting {} recommendations per paper", limitPerPaper);
-        
-        // Use a map to track unique recommendations by ID
-        Map<String, ArticleDTO> uniqueRecommendations = new ConcurrentHashMap<>();
-        
-        // Process each paper ID to get recommendations
-        for (String paperId : request.getPaperIds()) {
-            try {
-                var response = apiClient.getRecommendationsForPaper(
-                        paperId, 
-                        limitPerPaper, 
-                        RECOMMENDATION_FIELDS
-                );
-                
-                if (response == null || response.getData() == null) {
-                    log.warn("No recommendations found for paper ID: {}", paperId);
-                    continue;
-                }
-                
-                // Add all recommendations to the unique map
-                response.getData().stream()
-                        .map(mapper::mapToArticleDTO)
-                        .forEach(article -> uniqueRecommendations.put(article.getId(), article));
-                
-                // If we already have enough recommendations, break early
-                if (uniqueRecommendations.size() >= TARGET_RECOMMENDATIONS) {
-                    break;
-                }
-            } catch (Exception e) {
-                log.error("Error fetching recommendations for paper {}: {}", paperId, e.getMessage(), e);
+        try {
+            // Use the new POST endpoint for recommendations
+            var response = apiClient.getRecommendations(
+                    request.getPaperIds(),
+                    TARGET_RECOMMENDATIONS,
+                    TARGET_FIELDS
+            );
+
+            log.debug("API Response for recommendations: {}", response.toString());
+
+            if (response.getRecommendedPapers() == null) {
+                log.warn("No recommendations found for the provided paper IDs");
+                return new SearchResponseDTO(new ArrayList<>(), 0, 0, 0, "recommendations");
             }
+            
+            // Map the recommendations to DTOs
+            List<ArticleDTO> recommendations = response.getRecommendedPapers().stream()
+                    .map(mapper::mapToArticleDTO)
+                    .collect(Collectors.toList());
+            
+            // Limit to target count if necessary
+            if (recommendations.size() > TARGET_RECOMMENDATIONS) {
+                recommendations = recommendations.subList(0, TARGET_RECOMMENDATIONS);
+            }
+            
+            log.info("Returning {} recommendations", recommendations.size());
+            
+            return new SearchResponseDTO(
+                    recommendations,
+                    recommendations.size(),
+                    0,
+                    1,
+                    "recommendations"
+            );
+        } catch (Exception e) {
+            log.error("Error fetching recommendations: {}", e.getMessage(), e);
+            return new SearchResponseDTO(new ArrayList<>(), 0, 0, 0, "recommendations");
         }
-        
-        // Convert the map to a list, limiting to target count
-        List<ArticleDTO> recommendations = new ArrayList<>(uniqueRecommendations.values());
-        if (recommendations.size() > TARGET_RECOMMENDATIONS) {
-            recommendations = recommendations.subList(0, TARGET_RECOMMENDATIONS);
-        }
-        
-        log.info("Returning {} recommendations", recommendations.size());
-        
-        return new SearchResponseDTO(
-                recommendations,
-                recommendations.size(),
-                0,
-                1,
-                "recommendations"
-        );
     }
     
     private int calculateLimitPerPaper(int paperCount) {
