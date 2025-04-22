@@ -24,7 +24,7 @@ class SearchStateMachine {
     constructor() {
         // Application state
         this.state = 'initial';
-        
+
         // Data state
         this.allResults = [];
         this.currentPage = 1;
@@ -32,45 +32,37 @@ class SearchStateMachine {
         this.activeFilters = {
             sortBy: 'relevance'
         };
-        
+
+        // Add history type state
+        this.historyType = 'search'; // 'search' or 'article'
+
         // State definitions
         this.states = {
             initial: {
-                enter: () => this.handleInitialState(),
-                exit: () => {}
-            },
-            searching: {
-                enter: (query) => this.handleSearchingState(query),
-                exit: () => $('#loader').hide()
-            },
-            results: {
-                enter: () => this.handleResultsState(),
-                exit: () => {
+                enter: () => this.handleInitialState(), exit: () => {
+                }
+            }, searching: {
+                enter: (query) => this.handleSearchingState(query), exit: () => $('#loader').hide()
+            }, results: {
+                enter: () => this.handleResultsState(), exit: () => {
                     // Hide results content when exiting this state
                     $('#searchResultsContainer').hide();
                 }
-            },
-            noResults: {
-                enter: () => this.handleNoResultsState(),
-                exit: () => {
+            }, noResults: {
+                enter: () => this.handleNoResultsState(), exit: () => {
                     // Hide no results message when exiting this state
                     $('#searchResultsContainer').hide();
                 }
-            },
-            error: {
-                enter: (errorMsg) => this.handleErrorState(errorMsg),
-                exit: () => {
+            }, error: {
+                enter: (errorMsg) => this.handleErrorState(errorMsg), exit: () => {
                     // Hide error message when exiting this state
                     $('#searchResultsContainer').hide();
                 }
-            },
-            viewingArticle: {
+            }, viewingArticle: {
                 enter: (articleId) => this.handleViewingArticleState(articleId),
                 exit: () => $('#articleModal').modal('hide')
-            },
-            viewingHistory: {
-                enter: () => this.handleViewingHistoryState(),
-                exit: () => {
+            }, viewingHistory: {
+                enter: (historyType) => this.handleViewingHistoryState(historyType), exit: () => {
                     // Hide history content when exiting this state
                     $('#searchHistoryContainer').hide();
                     $('#searchResultsContainer').hide();
@@ -105,7 +97,16 @@ class SearchStateMachine {
 
         // Load history when switching to the tab
         $('#history-tab').on('shown.bs.tab', () => {
-            this.transition('viewingHistory');
+            this.transition('viewingHistory', 'search');
+        });
+
+        // Sub-history tabs
+        $('#search-history-tab').on('shown.bs.tab', () => {
+            this.loadSearchHistory();
+        });
+
+        $('#article-history-tab').on('shown.bs.tab', () => {
+            this.loadArticleHistory();
         });
 
         // Sort options
@@ -270,9 +271,7 @@ class SearchStateMachine {
         $('#loader').show();
 
         $.ajax({
-            url: `/api/search/article/${articleId}`,
-            method: 'GET',
-            success: (article) => {
+            url: `/api/search/article/${articleId}`, method: 'GET', success: (article) => {
                 // Build HTML for article details
                 let detailsHtml = `
                     <h4>${article.title}</h4>
@@ -328,8 +327,7 @@ class SearchStateMachine {
                 // Show modal
                 $('#articleModal').modal('show');
                 $('#loader').hide();
-            },
-            error: (error) => {
+            }, error: (error) => {
                 console.error('Error loading article details:', error);
                 alert('Could not load article details.');
                 $('#loader').hide();
@@ -339,15 +337,30 @@ class SearchStateMachine {
     }
 
     // History state handler
-    handleViewingHistoryState() {
+    handleViewingHistoryState(historyType = 'search') {
         // Show history container and hide search results
         $('#searchHistoryContainer').show();
         $('#searchResultsContainer').hide();
 
+        // Set default active tab based on history type
+        if (historyType === 'article') {
+            $('#article-history-tab').tab('show');
+        } else {
+            $('#search-history-tab').tab('show');
+        }
+
+        // Load appropriate history type
+        if (historyType === 'article') {
+            this.loadArticleHistory();
+        } else {
+            this.loadSearchHistory();
+        }
+    }
+
+    // Load search history
+    loadSearchHistory() {
         $.ajax({
-            url: '/api/search/history',
-            method: 'GET',
-            success: (history) => {
+            url: '/api/search/history', method: 'GET', success: (history) => {
                 if (!history || history.length === 0) {
                     $('#searchHistoryContent').html(`
                         <div class="alert panel-alert-secondary">No recent searches in your history.</div>
@@ -385,12 +398,63 @@ class SearchStateMachine {
 
                 historyHtml += `</tbody></table>`;
                 $('#searchHistoryContent').html(historyHtml);
-            },
-            error: (err) => {
+            }, error: (err) => {
                 $('#searchHistoryContent').html(`
                     <div class="alert panel-alert-danger">Error loading search history.</div>
                 `);
                 console.error('Error loading history:', err);
+            }
+        });
+    }
+
+    // Load article view history
+    loadArticleHistory() {
+        $.ajax({
+            url: '/api/search/article-history', method: 'GET', success: (history) => {
+                if (!history || history.length === 0) {
+                    $('#articleHistoryContent').html(`
+                        <div class="alert panel-alert-secondary">No recent article views in your history.</div>
+                    `);
+                    return;
+                }
+
+                let historyHtml = `
+                    <table class="panel-table">
+                        <thead>
+                            <tr>
+                                <th>Article</th>
+                                <th>Viewed On</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                history.forEach(item => {
+                    const date = new Date(item.viewDate).toLocaleString();
+                    const articleId = item.articleId;
+                    const articleTitle = item.articleTitle || articleId;
+
+                    historyHtml += `
+                        <tr>
+                            <td>${articleTitle}</td>
+                            <td>${date}</td>
+                            <td>
+                                <button class="btn panel-action-btn panel-action-primary view-details" data-id="${articleId}">
+                                    View Again
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                historyHtml += `</tbody></table>`;
+                $('#articleHistoryContent').html(historyHtml);
+            }, error: (err) => {
+                $('#articleHistoryContent').html(`
+                    <div class="alert panel-alert-danger">Error loading article view history.</div>
+                `);
+                console.error('Error loading article history:', err);
             }
         });
     }
