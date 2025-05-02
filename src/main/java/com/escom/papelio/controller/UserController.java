@@ -18,6 +18,11 @@ public class UserController {
     private final UserRepository userRepository;
 
     @GetMapping
+    public String redirectToDashboard() {
+        return "user/dashboard";
+    }
+
+    @GetMapping("/dashboard")
     public String dashboard() {
         return "user/dashboard";
     }
