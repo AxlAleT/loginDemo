@@ -36,6 +36,10 @@ class SearchStateMachine {
         // Add history type state
         this.historyType = 'search'; // 'search' or 'article'
 
+        // Current article for favorites
+        this.currentArticle = null;
+        this.isFavorite = false;
+
         // State definitions
         this.states = {
             initial: {
@@ -148,6 +152,103 @@ class SearchStateMachine {
             $('#basic-tab').tab('show');
             $('#basicQuery').val(query);
             setTimeout(() => $('#basicSearchBtn').click(), 300);
+        });
+
+        // Favorite button click
+        $('#favoriteButton').on('click', () => {
+            if (!this.currentArticle) return;
+
+            if (this.isFavorite) {
+                this.removeFromFavorites();
+            } else {
+                this.addToFavorites();
+            }
+        });
+    }
+
+    // Check if an article is favorited and update UI
+    checkFavoriteStatus(articleId) {
+        $('#loader').show();
+
+        $.ajax({
+            url: `/api/search/favorite/check/${articleId}`,
+            method: 'GET',
+            success: (response) => {
+                this.isFavorite = response.isFavorite;
+                this.updateFavoriteButtonUI();
+                $('#loader').hide();
+            },
+            error: (error) => {
+                console.error('Error checking favorite status:', error);
+                // Default to not favorited if error occurs
+                this.isFavorite = false;
+                this.updateFavoriteButtonUI();
+                $('#loader').hide();
+            }
+        });
+    }
+
+    // Update favorite button appearance based on current state
+    updateFavoriteButtonUI() {
+        const $button = $('#favoriteButton');
+
+        if (this.isFavorite) {
+            $button.html('<i class="mdi mdi-heart"></i> Remove from Favorites');
+            $button.removeClass('panel-action-secondary').addClass('panel-action-danger');
+        } else {
+            $button.html('<i class="mdi mdi-heart-outline"></i> Add to Favorites');
+            $button.removeClass('panel-action-danger').addClass('panel-action-secondary');
+        }
+    }
+
+    // Add current article to favorites
+    addToFavorites() {
+        if (!this.currentArticle) return;
+
+        $('#loader').show();
+
+        const payload = {
+            articleId: this.currentArticle.id,
+            title: this.currentArticle.title
+        };
+
+        $.ajax({
+            url: '/api/search/favorite',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: (response) => {
+                this.isFavorite = true;
+                this.updateFavoriteButtonUI();
+                $('#loader').hide();
+            },
+            error: (error) => {
+                console.error('Error adding to favorites:', error);
+                $('#loader').hide();
+                alert('Failed to add article to favorites. Please try again.');
+            }
+        });
+    }
+
+    // Remove current article from favorites
+    removeFromFavorites() {
+        if (!this.currentArticle) return;
+
+        $('#loader').show();
+
+        $.ajax({
+            url: `/api/search/favorite/${this.currentArticle.id}`,
+            method: 'DELETE',
+            success: (response) => {
+                this.isFavorite = false;
+                this.updateFavoriteButtonUI();
+                $('#loader').hide();
+            },
+            error: (error) => {
+                console.error('Error removing from favorites:', error);
+                $('#loader').hide();
+                alert('Failed to remove article from favorites. Please try again.');
+            }
         });
     }
 
@@ -272,9 +373,15 @@ class SearchStateMachine {
         $('#loader').show();
 
         $.ajax({
-            url: `/api/search/article/${articleId}?title=${encodeURIComponent(title)}`, // changed line
+            url: `/api/search/article/${articleId}?title=${encodeURIComponent(title)}`,
             method: 'GET',
             success: (article) => {
+                // Store the current article for favorite functionality
+                this.currentArticle = article;
+
+                // Check if this article is in favorites
+                this.checkFavoriteStatus(articleId);
+
                 // Build HTML for article details
                 let detailsHtml = `
                     <h4>${article.title}</h4>
@@ -598,4 +705,3 @@ class SearchStateMachine {
         $('#resultsPagination').html(paginationHtml);
     }
 }
-

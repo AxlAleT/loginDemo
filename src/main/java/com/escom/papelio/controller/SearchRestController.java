@@ -1,9 +1,11 @@
 package com.escom.papelio.controller;
 
 import com.escom.papelio.dto.ArticleDTO;
+import com.escom.papelio.dto.ArticleFavoriteRequestDTO;
 import com.escom.papelio.dto.RecommendationRequestDTO;
 import com.escom.papelio.dto.SearchRequestDTO;
 import com.escom.papelio.dto.SearchResponseDTO;
+import com.escom.papelio.service.ArticleFavoriteService;
 import com.escom.papelio.service.ArticleService;
 import com.escom.papelio.service.ArticleViewHistoryService;
 import com.escom.papelio.service.SearchHistoryService;
@@ -11,11 +13,13 @@ import com.escom.papelio.service.SemanticScholarService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/search")
@@ -27,6 +31,7 @@ public class SearchRestController {
     private final SearchHistoryService searchHistoryService;
     private final ArticleViewHistoryService articleViewHistoryService;
     private final SemanticScholarService semanticScholarService;
+    private final ArticleFavoriteService articleFavoriteService;
 
     @PostMapping
     public ResponseEntity<SearchResponseDTO> basicSearch(
@@ -108,5 +113,78 @@ public class SearchRestController {
             recommendations.getArticles().size(), userEmail);
         
         return ResponseEntity.ok(recommendations);
+    }
+
+    @PostMapping("/favorite")
+    public ResponseEntity<?> addArticleToFavorites(
+            @Valid @RequestBody ArticleFavoriteRequestDTO favoriteRequest,
+            Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+        
+        boolean added = articleFavoriteService.saveArticleFavorite(
+            authentication.getName(), 
+            favoriteRequest.getArticleId(), 
+            favoriteRequest.getTitle()
+        );
+        
+        if (added) {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("message", "Article added to favorites"));
+        } else {
+            return ResponseEntity.status(HttpStatus.OK)
+                .body(Map.of("message", "Article was already in favorites"));
+        }
+    }
+    
+    @DeleteMapping("/favorite/{articleId}")
+    public ResponseEntity<?> removeArticleFromFavorites(
+            @PathVariable String articleId,
+            Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+        
+        boolean removed = articleFavoriteService.removeArticleFavorite(
+            authentication.getName(), 
+            articleId
+        );
+        
+        if (removed) {
+            return ResponseEntity.ok(Map.of("message", "Article removed from favorites"));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", "Article was not in favorites"));
+        }
+    }
+    
+    @GetMapping("/favorite")
+    public ResponseEntity<SearchResponseDTO> getUserFavorites(Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+        
+        SearchResponseDTO favorites = articleFavoriteService.getUserFavoritesAsDTO(
+            authentication.getName()
+        );
+        
+        return ResponseEntity.ok(favorites);
+    }
+    
+    @GetMapping("/favorite/check/{articleId}")
+    public ResponseEntity<Map<String, Boolean>> checkIfFavorite(
+            @PathVariable String articleId,
+            Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+        
+        boolean isFavorite = articleFavoriteService.isArticleFavorite(
+            authentication.getName(), 
+            articleId
+        );
+        
+        return ResponseEntity.ok(Map.of("isFavorite", isFavorite));
     }
 }
