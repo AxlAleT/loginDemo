@@ -3,7 +3,7 @@
     --background-color: #d0d0ce;
     --text-color: #000;
     --card-bg: #fff;
-    --secondary-text: #919aa3;
+    --secondary-text: #000;
     --border-color: #d5dae2;
     --heading-color: #05344f;
     --link-color: #0d2366;
@@ -14,6 +14,7 @@
     --shadow-color: rgba(172, 168, 168, 0.43);
     --table-header-bg: #f8f9fa;
     --table-hover-bg: #f8f9fa;
+    --chip-bg: #e9ecef;
     
     /* Button colors */
     --danger-bg: #dc3545;
@@ -50,6 +51,7 @@
     --shadow-color: rgba(0, 0, 0, 0.5);
     --table-header-bg: #252525;
     --table-hover-bg: #252525;
+    --chip-bg: #333333;
     
     /* Button colors */
     --danger-bg: #ad2c39;
@@ -97,6 +99,18 @@ h1, h2, h3, h4, h5, h6,
     font-weight: bold;
     color: var(--heading-color);
     transition: color 0.3s ease;
+}
+
+.author-chip {
+    background-color: var(--chip-bg);
+    border-radius: 16px;
+    padding: 2px 10px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    display: inline-block;
+    font-size: 13px;
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Panel General */

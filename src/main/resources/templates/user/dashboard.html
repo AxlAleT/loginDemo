@@ -7,6 +7,8 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Dashboard</title>
     <link href="https://fonts.googleapis.com/css?family=Karla:400,700&display=swap" rel="stylesheet">
     <link href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css" rel="stylesheet">
@@ -105,6 +107,36 @@
         </div>
     </div>
 </div>
+
+<!-- Article Details Modal -->
+<div aria-hidden="true" class="modal fade" id="articleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Article Details</h5>
+                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="articleDetails">
+                <!-- Article details will be loaded here -->
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn panel-action-secondary" data-dismiss="modal" type="button">Close</button>
+                <button class="btn panel-action-secondary" id="favoriteButton">
+                    <i class="mdi mdi-heart-outline"></i> Add to Favorites
+                </button>
+                <a class="btn panel-action-primary" href="#" id="viewFullArticle" target="_blank">View Full Article</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script th:src="@{/js/themeLoader.js}"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>

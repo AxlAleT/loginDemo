@@ -83,13 +83,19 @@
                     <!-- Sub-navigation for history types -->
                     <ul class="nav nav-pills mb-3" id="historySubTabs" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" id="search-history-tab" data-toggle="pill" href="#searchHistoryContent" role="tab">Search History</a>
+                            <a class="nav-link active" data-toggle="pill" href="#searchHistoryContent"
+                               id="search-history-tab" role="tab">Search History</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="article-history-tab" data-toggle="pill" href="#articleHistoryContent" role="tab">Article History</a>
+                            <a class="nav-link" data-toggle="pill" href="#articleHistoryContent"
+                               id="article-history-tab" role="tab">Article History</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="pill" href="#favoritesContent" id="favorites-tab"
+                               role="tab">Favorites</a>
                         </li>
                     </ul>
-                    
+
                     <!-- Sub-tab content -->
                     <div class="tab-content" id="historySubTabsContent">
                         <!-- Search History Content -->
@@ -98,11 +104,18 @@
                                 <p>Loading search history...</p>
                             </div>
                         </div>
-                        
+
                         <!-- Article History Content -->
                         <div class="tab-pane fade" id="articleHistoryContent" role="tabpanel">
                             <div class="text-center">
                                 <p>Loading article view history...</p>
+                            </div>
+                        </div>
+
+                        <!-- Favorites Content -->
+                        <div class="tab-pane fade" id="favoritesContent" role="tabpanel">
+                            <div class="text-center">
+                                <p>Loading favorites...</p>
                             </div>
                         </div>
                     </div>
@@ -112,12 +125,20 @@
             <!-- Loader Indicator -->
             <div class="loader" id="loader"></div>
 
-            <!-- Search Results -->
-            <div class="search-results mt-4" id="searchResults"></div>
+            <!-- Search Results Container -->
+            <div id="searchResultsContainer">
+                <!-- Search Results -->
+                <div class="search-results mt-4" id="searchResults"></div>
 
-            <!-- Pagination Controls -->
-            <div class="mt-4" id="resultsPagination">
-                <!-- Pagination will be inserted by JavaScript -->
+                <!-- Pagination Controls -->
+                <div class="mt-4" id="resultsPagination">
+                    <!-- Pagination will be inserted by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Search History Container -->
+            <div id="searchHistoryContainer" style="display: none;">
+                <!-- History content will be displayed here by JavaScript -->
             </div>
         </div>
     </div>
@@ -138,7 +159,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn panel-action-secondary" data-dismiss="modal" type="button">Close</button>
-                <button id="favoriteButton" class="btn panel-action-secondary">
+                <button class="btn panel-action-secondary" id="favoriteButton">
                     <i class="mdi mdi-heart-outline"></i> Add to Favorites
                 </button>
                 <a class="btn panel-action-primary" href="#" id="viewFullArticle" target="_blank">View Full Article</a>

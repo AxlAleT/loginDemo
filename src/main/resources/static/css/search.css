@@ -3,7 +3,7 @@
     --background-color: #d0d0ce;
     --text-color: #000;
     --card-bg: #fff;
-    --secondary-text: #919aa3;
+    --secondary-text: #000;
     --border-color: #d5dae2;
     --link-color: #0d2366;
     --button-bg: #0d2366;
@@ -32,7 +32,7 @@
     /* Dark theme */
     --background-color: #121212;
     --text-color: #ffffff;
-    --card-bg: #1e1e1e;
+    --card-bg: #212529;
     --secondary-text: #b0b0b0;
     --border-color: #333333;
     --link-color: #64b5f6;

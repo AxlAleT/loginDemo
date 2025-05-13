@@ -2,7 +2,7 @@ const csrfToken = $("meta[name='_csrf']").attr("content");
 const csrfHeader = $("meta[name='_csrf_header']").attr("content");
 
 $(document).ready(function () {
-    // Configure CSRF header for all AJAX requests
+   
     $.ajaxSetup({
         beforeSend: function (xhr) {
             if (csrfHeader && csrfToken) {
@@ -11,9 +11,20 @@ $(document).ready(function () {
         }
     });
 
-    // Initialize the search state machine
+   
     const searchApp = new SearchStateMachine();
     searchApp.init();
+
+   
+    $('#basic-tab').on('shown.bs.tab', function() {
+        $('#searchHistoryContainer').hide();
+        $('#searchResultsContainer').show();
+    });
+
+    $('#history-tab').on('shown.bs.tab', function() {
+        $('#searchResultsContainer').hide();
+        $('#searchHistoryContainer').show();
+    });
 });
 
 /**
@@ -22,10 +33,10 @@ $(document).ready(function () {
  */
 class SearchStateMachine {
     constructor() {
-        // Application state
+       
         this.state = 'initial';
 
-        // Data state
+       
         this.allResults = [];
         this.currentPage = 1;
         this.resultsPerPage = 10;
@@ -33,14 +44,14 @@ class SearchStateMachine {
             sortBy: 'relevance'
         };
 
-        // Add history type state
-        this.historyType = 'search'; // 'search' or 'article'
+       
+        this.historyType = 'search';
 
-        // Current article for favorites
+       
         this.currentArticle = null;
         this.isFavorite = false;
 
-        // State definitions
+       
         this.states = {
             initial: {
                 enter: () => this.handleInitialState(), exit: () => {
@@ -49,25 +60,25 @@ class SearchStateMachine {
                 enter: (query) => this.handleSearchingState(query), exit: () => $('#loader').hide()
             }, results: {
                 enter: () => this.handleResultsState(), exit: () => {
-                    // Hide results content when exiting this state
+                   
                     $('#searchResultsContainer').hide();
                 }
             }, noResults: {
                 enter: () => this.handleNoResultsState(), exit: () => {
-                    // Hide no results message when exiting this state
+                   
                     $('#searchResultsContainer').hide();
                 }
             }, error: {
                 enter: (errorMsg) => this.handleErrorState(errorMsg), exit: () => {
-                    // Hide error message when exiting this state
+                   
                     $('#searchResultsContainer').hide();
                 }
             }, viewingArticle: {
                 enter: (articleId, title) => this.handleViewingArticleState(articleId, title),
-                exit: () => $('#articleModal').modal('hide')
+                exit: () => this.exitArticle()
             }, viewingHistory: {
                 enter: (historyType) => this.handleViewingHistoryState(historyType), exit: () => {
-                    // Hide history content when exiting this state
+                   
                     $('#searchHistoryContainer').hide();
                     $('#searchResultsContainer').hide();
                 }
@@ -75,15 +86,19 @@ class SearchStateMachine {
         };
     }
 
-    // Initialize the application
+    exitArticle(){
+        $('#articleModal').modal('hide');
+        $('#searchResultsContainer').show();
+    }
+   
     init() {
         this.setupEventListeners();
         this.transition('initial');
     }
 
-    // Set up event listeners
+   
     setupEventListeners() {
-        // Search events
+       
         $('#basicSearchBtn').click(() => {
             const query = $('#basicQuery').val().trim();
             if (query) {
@@ -92,19 +107,21 @@ class SearchStateMachine {
             }
         });
 
-        // Search on Enter key
+       
         $('#basicQuery').keypress((e) => {
             if (e.which === 13) {
                 $('#basicSearchBtn').click();
             }
         });
 
-        // Load history when switching to the tab
+       
         $('#history-tab').on('shown.bs.tab', () => {
+            $('#searchResultsContainer').hide();
+            $('#searchHistoryContainer').show();
             this.transition('viewingHistory', 'search');
         });
 
-        // Sub-history tabs
+       
         $('#search-history-tab').on('shown.bs.tab', () => {
             this.loadSearchHistory();
         });
@@ -113,40 +130,50 @@ class SearchStateMachine {
             this.loadArticleHistory();
         });
 
-        // Sort options
+        $('#favorites-tab').on('shown.bs.tab', () => {
+            this.loadFavorites();
+        });
+
+        // Add event handler for modal close to ensure results are shown again
+        $('#articleModal').on('hidden.bs.modal', () => {
+            if (this.state === 'viewingArticle') {
+                this.transition('results');
+            }
+        });
+       
         $(document).on('click', '.sort-option', (e) => {
             this.activeFilters.sortBy = $(e.currentTarget).data('sort');
 
-            // Update the dropdown button text
+           
             $('#sortOptionsDropdown').text('Sort by: ' + $(e.currentTarget).text());
 
-            // Reset to first page and refresh results
+           
             this.currentPage = 1;
             this.transition('results');
         });
 
-        // Pagination clicks
+       
         $(document).on('click', '.page-link', (e) => {
             e.preventDefault();
             const page = $(e.currentTarget).data('page');
             if (page && page !== this.currentPage) {
                 this.currentPage = page;
                 this.transition('results');
-                // Scroll back to top of results
+               
                 $('html, body').animate({
                     scrollTop: $("#searchResults").offset().top - 20
                 }, 200);
             }
         });
 
-        // View article details: ensure both articleId and title are passed
+       
         $(document).on('click', '.view-details', (e) => {
             const articleId = $(e.currentTarget).data('id');
-            const title = $(e.currentTarget).data('title'); // new: retrieve title
+            const title = $(e.currentTarget).data('title');
             this.transition('viewingArticle', articleId, title);
         });
 
-        // Repeat search from history
+       
         $(document).on('click', '.repeat-search', (e) => {
             const query = $(e.currentTarget).data('query');
             $('#basic-tab').tab('show');
@@ -154,7 +181,7 @@ class SearchStateMachine {
             setTimeout(() => $('#basicSearchBtn').click(), 300);
         });
 
-        // Favorite button click
+       
         $('#favoriteButton').on('click', () => {
             if (!this.currentArticle) return;
 
@@ -166,7 +193,7 @@ class SearchStateMachine {
         });
     }
 
-    // Check if an article is favorited and update UI
+   
     checkFavoriteStatus(articleId) {
         $('#loader').show();
 
@@ -180,7 +207,7 @@ class SearchStateMachine {
             },
             error: (error) => {
                 console.error('Error checking favorite status:', error);
-                // Default to not favorited if error occurs
+               
                 this.isFavorite = false;
                 this.updateFavoriteButtonUI();
                 $('#loader').hide();
@@ -188,7 +215,7 @@ class SearchStateMachine {
         });
     }
 
-    // Update favorite button appearance based on current state
+   
     updateFavoriteButtonUI() {
         const $button = $('#favoriteButton');
 
@@ -201,7 +228,7 @@ class SearchStateMachine {
         }
     }
 
-    // Add current article to favorites
+   
     addToFavorites() {
         if (!this.currentArticle) return;
 
@@ -230,7 +257,7 @@ class SearchStateMachine {
         });
     }
 
-    // Remove current article from favorites
+   
     removeFromFavorites() {
         if (!this.currentArticle) return;
 
@@ -252,44 +279,66 @@ class SearchStateMachine {
         });
     }
 
-    // State transition
+   
+    removeFromFavoritesList(articleId) {
+        if (!articleId) return;
+
+        $('#loader').show();
+
+        $.ajax({
+            url: `/api/search/favorite/${articleId}`,
+            method: 'DELETE',
+            success: (response) => {
+                $('#loader').hide();
+               
+                this.loadFavorites();
+            },
+            error: (error) => {
+                console.error('Error removing from favorites:', error);
+                $('#loader').hide();
+                alert('Failed to remove article from favorites. Please try again.');
+            }
+        });
+    }
+
+   
     transition(newState, ...args) {
-        // Execute exit action for current state
+       
         this.states[this.state].exit();
 
-        // Update state
+       
         this.state = newState;
 
-        // Execute enter action for new state with arguments
+       
         this.states[this.state].enter(...args);
     }
 
-    // Reset pagination when starting a new search
+   
     resetPagination() {
         this.allResults = [];
         this.currentPage = 1;
-        // Keep the current sort option
+       
     }
 
-    // STATE HANDLERS
+   
 
-    // Initial state handler
+   
     handleInitialState() {
         $('#searchResults').empty();
         $('#resultsPagination').empty();
-        // Make sure search tab content is visible initially
+       
         $('#searchResultsContainer').show();
         $('#searchHistoryContainer').hide();
     }
 
-    // Searching state handler
+   
     handleSearchingState(query) {
-        // Show loading indicator
+       
         $('#loader').show();
         $('#searchResults').empty();
         $('#resultsPagination').empty();
 
-        // Make sure search tab content is visible
+       
         $('#searchResultsContainer').show();
         $('#searchHistoryContainer').hide();
 
@@ -302,7 +351,7 @@ class SearchStateMachine {
             contentType: 'application/json',
             data: JSON.stringify(payload),
             success: (response) => {
-                // Store all results for pagination
+               
                 this.allResults = response.articles || [];
 
                 if (this.allResults.length > 0) {
@@ -318,9 +367,9 @@ class SearchStateMachine {
         });
     }
 
-    // Results state handler
+   
     handleResultsState() {
-        // Make sure search tab content is visible
+       
         $('#searchResultsContainer').show();
         $('#searchHistoryContainer').hide();
 
@@ -328,21 +377,21 @@ class SearchStateMachine {
         const totalResults = filteredResults.length;
         const totalPages = Math.ceil(totalResults / this.resultsPerPage);
 
-        // Calculate range for current page
+       
         const startIndex = (this.currentPage - 1) * this.resultsPerPage;
         const endIndex = Math.min(startIndex + this.resultsPerPage, totalResults);
         const currentResults = filteredResults.slice(startIndex, endIndex);
 
-        // Display results
+       
         this.displayResults(currentResults, startIndex + 1, endIndex, totalResults);
 
-        // Generate pagination
+       
         this.generatePagination(totalPages);
     }
 
-    // No results state handler
+   
     handleNoResultsState() {
-        // Make sure search tab content is visible
+       
         $('#searchResultsContainer').show();
         $('#searchHistoryContainer').hide();
 
@@ -354,9 +403,9 @@ class SearchStateMachine {
         $('#resultsPagination').empty();
     }
 
-    // Error state handler
+   
     handleErrorState(errorMsg) {
-        // Make sure search tab content is visible
+       
         $('#searchResultsContainer').show();
         $('#searchHistoryContainer').hide();
 
@@ -368,7 +417,7 @@ class SearchStateMachine {
         $('#resultsPagination').empty();
     }
 
-    // Viewing article state handler
+   
     handleViewingArticleState(articleId, title) {
         $('#loader').show();
 
@@ -376,13 +425,13 @@ class SearchStateMachine {
             url: `/api/search/article/${articleId}?title=${encodeURIComponent(title)}`,
             method: 'GET',
             success: (article) => {
-                // Store the current article for favorite functionality
+               
                 this.currentArticle = article;
 
-                // Check if this article is in favorites
+               
                 this.checkFavoriteStatus(articleId);
 
-                // Build HTML for article details
+               
                 let detailsHtml = `
                     <h4>${article.title}</h4>
                     <div class="my-3">
@@ -424,17 +473,17 @@ class SearchStateMachine {
                     detailsHtml += '</div>';
                 }
 
-                // Display details in the modal
+               
                 $('#articleDetails').html(detailsHtml);
 
-                // Set link to view full article
+               
                 if (article.url) {
                     $('#viewFullArticle').attr('href', article.url).show();
                 } else {
                     $('#viewFullArticle').hide();
                 }
 
-                // Show modal
+               
                 $('#articleModal').modal('show');
                 $('#loader').hide();
             }, error: (error) => {
@@ -446,28 +495,32 @@ class SearchStateMachine {
         });
     }
 
-    // History state handler
+   
     handleViewingHistoryState(historyType = 'search') {
-        // Show history container and hide search results
+       
         $('#searchHistoryContainer').show();
         $('#searchResultsContainer').hide();
 
-        // Set default active tab based on history type
+       
         if (historyType === 'article') {
             $('#article-history-tab').tab('show');
+        } else if (historyType === 'favorites') {
+            $('#favorites-tab').tab('show');
         } else {
             $('#search-history-tab').tab('show');
         }
 
-        // Load appropriate history type
+       
         if (historyType === 'article') {
             this.loadArticleHistory();
+        } else if (historyType === 'favorites') {
+            this.loadFavorites();
         } else {
             this.loadSearchHistory();
         }
     }
 
-    // Load search history
+   
     loadSearchHistory() {
         $.ajax({
             url: '/api/search/history', method: 'GET', success: (history) => {
@@ -517,7 +570,7 @@ class SearchStateMachine {
         });
     }
 
-    // Load article view history
+   
     loadArticleHistory() {
         $.ajax({
             url: '/api/search/article-history', method: 'GET', success: (history) => {
@@ -568,13 +621,75 @@ class SearchStateMachine {
         });
     }
 
-    // UTILITY METHODS
+   
+    loadFavorites() {
+        $.ajax({
+            url: '/api/search/favorite',
+            method: 'GET',
+            success: (response) => {
+                const favorites = response.articles || [];
 
-    // Filter and sort results based on active filters
+                if (favorites.length === 0) {
+                    $('#favoritesContent').html(`
+                        <div class="alert panel-alert-secondary">You haven't added any articles to your favorites yet.</div>
+                    `);
+                    return;
+                }
+
+                let favoritesHtml = `
+                    <table class="panel-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                favorites.forEach(article => {
+                    favoritesHtml += `
+                        <tr>
+                            <td>${article.title}</td>
+                            <td>
+                                <button class="btn panel-action-btn panel-action-primary view-details" 
+                                    data-id="${article.id}" data-title="${article.title}">
+                                    View Details
+                                </button>
+                                <button class="btn panel-action-btn panel-action-danger remove-favorite" 
+                                    data-id="${article.id}">
+                                    <i class="mdi mdi-heart-off"></i> Remove
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                favoritesHtml += `</tbody></table>`;
+                $('#favoritesContent').html(favoritesHtml);
+
+               
+                $('.remove-favorite').on('click', (e) => {
+                    const articleId = $(e.currentTarget).data('id');
+                    this.removeFromFavoritesList(articleId);
+                });
+            },
+            error: (err) => {
+                $('#favoritesContent').html(`
+                    <div class="alert panel-alert-danger">Error loading favorites.</div>
+                `);
+                console.error('Error loading favorites:', err);
+            }
+        });
+    }
+
+   
+
+   
     getFilteredResults() {
         let filtered = [...this.allResults];
 
-        // Apply sorting
+       
         if (this.activeFilters.sortBy) {
             switch (this.activeFilters.sortBy) {
                 case 'citations':
@@ -583,14 +698,14 @@ class SearchStateMachine {
                 case 'year':
                     filtered.sort((a, b) => (b.year || 0) - (a.year || 0));
                     break;
-                // 'relevance' is default, already sorted from API
+               
             }
         }
 
         return filtered;
     }
 
-    // Display results
+   
     displayResults(articles, startCount, endCount, totalCount) {
         let resultsHtml = `
             <div class="results-header mb-3">
@@ -600,7 +715,7 @@ class SearchStateMachine {
         `;
 
         articles.forEach(article => {
-            // Prepare author list for display
+           
             let authorsHtml = '';
             if (article.authors && article.authors.length > 0) {
                 article.authors.slice(0, 3).forEach(author => {
@@ -612,7 +727,7 @@ class SearchStateMachine {
                 }
             }
 
-            // Build article card
+           
             resultsHtml += `
                 <div class="col-md-6 mb-4">
                     <div class="panel-card article-card" data-id="${article.id}">
@@ -639,7 +754,7 @@ class SearchStateMachine {
         $('#searchResults').html(resultsHtml);
     }
 
-    // Generate pagination controls
+   
     generatePagination(totalPages) {
         if (totalPages <= 1) {
             $('#resultsPagination').empty();
@@ -648,7 +763,7 @@ class SearchStateMachine {
 
         let paginationHtml = '<nav aria-label="Search results pagination"><ul class="pagination justify-content-center">';
 
-        // Previous button
+       
         paginationHtml += `
             <li class="page-item ${this.currentPage === 1 ? 'disabled' : ''}">
                 <a class="page-link" href="#" data-page="${this.currentPage - 1}" aria-label="Previous">
@@ -657,17 +772,17 @@ class SearchStateMachine {
             </li>
         `;
 
-        // Generate page numbers
+       
         const maxVisiblePages = 5;
         let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
-        // Adjust if we're at the end
+       
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
 
-        // First page and ellipsis if needed
+       
         if (startPage > 1) {
             paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
             if (startPage > 2) {
@@ -675,7 +790,7 @@ class SearchStateMachine {
             }
         }
 
-        // Page numbers
+       
         for (let i = startPage; i <= endPage; i++) {
             paginationHtml += `
                 <li class="page-item ${i === this.currentPage ? 'active' : ''}">
@@ -684,7 +799,7 @@ class SearchStateMachine {
             `;
         }
 
-        // Last page and ellipsis if needed
+       
         if (endPage < totalPages) {
             if (endPage < totalPages - 1) {
                 paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
@@ -692,10 +807,10 @@ class SearchStateMachine {
             paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`;
         }
 
-        // Next button
+       
         paginationHtml += `
             <li class="page-item ${this.currentPage === totalPages ? 'disabled' : ''}">
-                <a class="page-link" href="#" data-page="${this.currentPage + 1}" aria-label="Next">
+                <a aria-label="Next" class="page-link" data-page="${this.currentPage + 1}" href="#">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>
@@ -705,3 +820,4 @@ class SearchStateMachine {
         $('#resultsPagination').html(paginationHtml);
     }
 }
+
