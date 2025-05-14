@@ -20,16 +20,16 @@
     </appender>
 
     <!-- Application logs -->
-    <logger name="com.escom.papelio" level="DEBUG" />
+    <logger name="com.escom.papelio" level="INFO" />
     
     <!-- Spring Framework -->
     <logger name="org.springframework" level="INFO" />
     
-    <!-- WebClient logging for API calls - change to DEBUG for more details -->
-    <logger name="org.springframework.web.reactive.function.client" level="DEBUG" />
+    <!-- WebClient logging for API calls - changed from DEBUG to INFO -->
+    <logger name="org.springframework.web.reactive.function.client" level="INFO" />
     
-    <!-- HTTP request/response logging -->
-    <logger name="reactor.netty.http.client" level="DEBUG" />
+    <!-- HTTP request/response logging - changed from DEBUG to INFO -->
+    <logger name="reactor.netty.http.client" level="INFO" />
     
     <!-- Root logger -->
     <root level="INFO">
